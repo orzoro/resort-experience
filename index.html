@@ -188,79 +188,74 @@
         }
 
         async function renderExperiences() {
-            const grid = document.getElementById('experience-grid');
-            grid.innerHTML = '<p class="text-white text-center col-span-full italic">Sincronizzazione in corso...</p>';
+    const grid = document.getElementById('experience-grid');
+    grid.innerHTML = '<p class="text-white text-center col-span-full italic">Sincronizzazione Experience Hub...</p>';
+    
+    try {
+        // Usiamo un proxy più moderno e stabile (corsproxy.io)
+        const proxyUrl = "https://corsproxy.io/?";
+        const targetUrl = SHEET_CSV_URL + "&cb=" + new Date().getTime();
+        
+        const response = await fetch(proxyUrl + encodeURIComponent(targetUrl));
+        
+        if (!response.ok) throw new Error("Server non disponibile (503)");
+        
+        const data = await response.text();
+        const rows = data.split(/\r?\n/).filter(row => row.trim() !== '').slice(1); 
+
+        grid.innerHTML = ''; 
+
+        rows.forEach(row => {
+            const cols = row.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g);
+            if (!cols || cols.length < 7) return; 
+
+            const titolo = cols[0].replace(/^"|"$/g, '').trim();
+            const guida = cols[1].replace(/^"|"$/g, '').trim();
+            const descrizione = cols[2].replace(/^"|"$/g, '').trim();
+            const difficolta = cols[3].replace(/^"|"$/g, '').trim().toLowerCase();
+            const costo = cols[4].replace(/^"|"$/g, '').trim();
+            const link = cols[5].replace(/^"|"$/g, '').trim();
+            const cell = cols[6].replace(/^"|"$/g, '').trim();
+            const nPersone = cols[7] ? cols[7].replace(/^"|"$/g, '').trim() : "";
+            const durata = cols[8] ? cols[8].replace(/^"|"$/g, '').trim() : "";
             
-            try {
-                const proxy = "https://api.allorigins.win/raw?url=";
-                const targetUrl = encodeURIComponent(SHEET_CSV_URL + "&cb=" + new Date().getTime());
-                
-                const response = await fetch(proxy + targetUrl);
-                const data = await response.text();
-                const rows = data.split(/\r?\n/).filter(row => row.trim() !== '').slice(1); 
+            const diff = difficolta || "verde";
+            const symMap = { "verde": "circle", "blu": "circle", "rosso": "square", "nero": "diamond" };
+            const bgClass = { "verde": "bg-verde", "blu": "bg-blu", "rosso": "bg-rosso", "nero": "bg-nero" }[diff] || "bg-slate-500";
+            
+            const cleanCell = cell.replace(/[^0-9]/g, '');
+            const finalCell = cleanCell.startsWith('39') ? cleanCell : '39' + cleanCell;
+            const waLink = cleanCell.length > 5 ? `https://wa.me/${finalCell}?text=Ciao, vorrei info per: ${titolo}` : (link || '#');
 
-                grid.innerHTML = ''; 
-
-                rows.forEach(row => {
-                    const cols = row.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g);
-                    if (!cols || cols.length < 7) return; 
-
-                    // MAPPATURA COLONNE: A=0, B=1, C=2, D=3, E=4, F=5, G=6 (Cell), H=7, I=8
-                    const titolo = cols[0].replace(/^"|"$/g, '').trim();
-                    const guida = cols[1].replace(/^"|"$/g, '').trim();
-                    const descrizione = cols[2].replace(/^"|"$/g, '').trim();
-                    const difficolta = cols[3].replace(/^"|"$/g, '').trim().toLowerCase();
-                    const costo = cols[4].replace(/^"|"$/g, '').trim();
-                    const link = cols[5].replace(/^"|"$/g, '').trim();
-                    const cell = cols[6].replace(/^"|"$/g, '').trim(); // Colonna G
-                    const nPersone = cols[7] ? cols[7].replace(/^"|"$/g, '').trim() : "";
-                    const durata = cols[8] ? cols[8].replace(/^"|"$/g, '').trim() : "";
-                    
-                    const diff = difficolta || "verde";
-                    const symMap = { "verde": "circle", "blu": "circle", "rosso": "square", "nero": "diamond" };
-                    const bgClass = { "verde": "bg-verde", "blu": "bg-blu", "rosso": "bg-rosso", "nero": "bg-nero" }[diff] || "bg-slate-500";
-                    
-                    // Pulizia numero cellulare
-                    const cleanCell = cell.replace(/[^0-9]/g, '');
-                    const finalCell = cleanCell.startsWith('39') ? cleanCell : '39' + cleanCell;
-                    const waLink = cleanCell.length > 5 ? `https://wa.me/${finalCell}?text=Ciao, vorrei prenotare l'esperienza: ${titolo}` : (link || '#');
-
-                    const card = document.createElement('div');
-                    card.className = "experience-card p-8 rounded-3xl flex flex-col justify-between shadow-2xl border border-white/5";
-                    card.innerHTML = `
-                        <div>
-                            <div class="flex justify-between items-start mb-6">
-                                <div class="bg-white/10 px-4 py-2 rounded-xl border border-white/5">
-                                    <span class="text-white font-black text-xl italic">€ ${costo || '-'}</span>
-                                </div>
-                                <div class="symbol ${symMap[diff] || 'circle'} ${bgClass} scale-125"></div>
-                            </div>
-                            
-                            <h3 class="text-2xl font-black text-white uppercase leading-tight mb-2 tracking-tighter">${titolo}</h3>
-                            <p class="text-[#c5a059] font-bold text-[10px] uppercase mb-4 tracking-[0.2em]">Guida: ${guida}</p>
-                            
-                            <div class="flex flex-wrap gap-2 mb-4">
-                                ${durata ? `<span class="bg-slate-800 text-slate-300 text-[9px] font-bold px-3 py-1 rounded-full border border-slate-700 italic">🕒 ${durata}</span>` : ''}
-                                ${nPersone ? `<span class="bg-slate-800 text-slate-300 text-[9px] font-bold px-3 py-1 rounded-full border border-slate-700 italic">👥 ${nPersone}</span>` : ''}
-                            </div>
-
-                            <p class="text-slate-400 text-sm leading-relaxed mb-6 line-clamp-4 italic">"${descrizione}"</p>
+            const card = document.createElement('div');
+            card.className = "experience-card p-8 rounded-3xl flex flex-col justify-between shadow-2xl border border-white/5";
+            card.innerHTML = `
+                <div>
+                    <div class="flex justify-between items-start mb-6">
+                        <div class="bg-white/10 px-4 py-2 rounded-xl border border-white/5">
+                            <span class="text-white font-black text-xl italic">€ ${costo || '-'}</span>
                         </div>
-                        
-                        <div class="flex flex-col gap-2">
-                            <a href="${waLink}" target="_blank" class="bg-[#c5a059] text-white text-center py-4 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-[#b08d4a] transition-all transform active:scale-95 shadow-lg">
-                                Prenota via WhatsApp
-                            </a>
-                        </div>
-                    `;
-                    grid.appendChild(card);
-                });
-            } catch (e) {
-                console.error("DEBUG:", e);
-                grid.innerHTML = '<p class="text-red-500 text-center col-span-full font-bold uppercase text-xs">Errore di Sincronizzazione.</p>';
-            }
-        }
-
+                        <div class="symbol ${symMap[diff] || 'circle'} ${bgClass} scale-125"></div>
+                    </div>
+                    <h3 class="text-2xl font-black text-white uppercase leading-tight mb-2 tracking-tighter">${titolo}</h3>
+                    <p class="text-[#c5a059] font-bold text-[10px] uppercase mb-4 tracking-[0.2em]">Guida: ${guida}</p>
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        ${durata ? `<span class="bg-slate-800 text-slate-300 text-[9px] font-bold px-3 py-1 rounded-full border border-slate-700 italic">🕒 ${durata}</span>` : ''}
+                        ${nPersone ? `<span class="bg-slate-800 text-slate-300 text-[9px] font-bold px-3 py-1 rounded-full border border-slate-700 italic">👥 ${nPersone}</span>` : ''}
+                    </div>
+                    <p class="text-slate-400 text-sm leading-relaxed mb-6 line-clamp-4 italic">"${descrizione}"</p>
+                </div>
+                <div class="flex flex-col gap-2">
+                    <a href="${waLink}" target="_blank" class="bg-[#c5a059] text-white text-center py-4 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-[#b08d4a] transition-all transform active:scale-95 shadow-lg">
+                        Prenota via WhatsApp
+                    </a>
+                </div>`;
+            grid.appendChild(card);
+        });
+    } catch (e) {
+        grid.innerHTML = `<p class="text-red-500 text-center col-span-full font-bold uppercase text-xs">Il server dei dati è occupato (503).<br>Riprova tra un istante.</p>`;
+    }
+}
         function openAdmin() { if (prompt("Password:") === ADMIN_PASS) { document.getElementById('admin-panel').style.display = 'block'; renderAdminList(); } }
         function closeAdmin() { document.getElementById('admin-panel').style.display = 'none'; }
 
