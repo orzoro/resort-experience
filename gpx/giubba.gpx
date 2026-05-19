@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<gpx
+ version="1.1"
+ creator="Global Mapper - http://www.globalmapper.com"
+ xmlns:globalmapper="https://www.bluemarblegeo.com/globalmapper"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xmlns="http://www.topografix.com/GPX/1/1"
+ xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
+ <metadata>
+ </metadata>
+<trk>
+ <name>IL GIUBBA</name>
+ <desc>Tracklog</desc>
+ <trkseg>
+  <trkpt lat="42.97276966" lon="10.89035902">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.97276170" lon="10.89036958">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.97269297" lon="10.89003900">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.97257436" lon="10.88985376">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.97249323" lon="10.88958277">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.97247563" lon="10.88944992">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.97247160" lon="10.88903736">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.97244721" lon="10.88892597">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.97240002" lon="10.88883544">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.97238175" lon="10.88880711">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.97225887" lon="10.88872639">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.97216323" lon="10.88862648">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.97195779" lon="10.88856420">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.97180767" lon="10.88840344">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.97173676" lon="10.88827234">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.97170122" lon="10.88815483">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.97161975" lon="10.88805651">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.97156627" lon="10.88795651">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.97149595" lon="10.88773180">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.97145043" lon="10.88766373">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.97135924" lon="10.88758318">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.97129487" lon="10.88742108">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.97121868" lon="10.88734229">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.97114341" lon="10.88717591">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.97093168" lon="10.88696385">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.97085482" lon="10.88695454">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.97073630" lon="10.88683242">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.97071031" lon="10.88678238">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.97056003" lon="10.88660862">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.97042474" lon="10.88636110">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.97030773" lon="10.88629774">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.97024621" lon="10.88619657">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.97019063" lon="10.88593555">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96997396" lon="10.88561520">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96986542" lon="10.88536558">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96990372" lon="10.88518043">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96987154" lon="10.88503567">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96987028" lon="10.88494532">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96998800" lon="10.88484700">
+   <ele>0</ele>
+  </trkpt>
+ </trkseg>
+</trk>
+ <extensions>
+ </extensions>
+</gpx>

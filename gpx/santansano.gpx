@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<gpx
+ version="1.1"
+ creator="Global Mapper - http://www.globalmapper.com"
+ xmlns:globalmapper="https://www.bluemarblegeo.com/globalmapper"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xmlns="http://www.topografix.com/GPX/1/1"
+ xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
+ <metadata>
+ </metadata>
+<trk>
+ <name>SANTANSANO</name>
+ <desc>Tracklog</desc>
+ <trkseg>
+  <trkpt lat="42.96929000" lon="10.89794900">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96915000" lon="10.89770000">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96897000" lon="10.89753000">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96890000" lon="10.89713000">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96862000" lon="10.89667000">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96836000" lon="10.89630000">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96778000" lon="10.89560000">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96753000" lon="10.89518000">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96734000" lon="10.89499000">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96714000" lon="10.89488000">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96609000" lon="10.89443000">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96594000" lon="10.89411000">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96572000" lon="10.89403100">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96555000" lon="10.89389000">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96498000" lon="10.89299000">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96477000" lon="10.89276100">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96452000" lon="10.89258000">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96431000" lon="10.89236000">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96413000" lon="10.89213000">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96391000" lon="10.89211000">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96332000" lon="10.89271000">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96336000" lon="10.89270000">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96324000" lon="10.89283000">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96310000" lon="10.89301900">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96301000" lon="10.89331000">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96296000" lon="10.89340000">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96242000" lon="10.89338000">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96215000" lon="10.89329000">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96210000" lon="10.89331000">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96205000" lon="10.89339000">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96199000" lon="10.89344100">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96101000" lon="10.89307000">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96031000" lon="10.89277000">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96024000" lon="10.89265100">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96024000" lon="10.89255000">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96039000" lon="10.89233000">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96039000" lon="10.89220900">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96030000" lon="10.89209000">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96004000" lon="10.89192000">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.95998000" lon="10.89171100">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.95962000" lon="10.89093900">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.95939000" lon="10.89066000">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.95928000" lon="10.88988000">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.95903000" lon="10.88937000">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.95891000" lon="10.88925000">
+   <ele>0</ele>
+  </trkpt>
+ </trkseg>
+</trk>
+ <extensions>
+ </extensions>
+</gpx>

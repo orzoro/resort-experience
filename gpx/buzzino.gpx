@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<gpx
+ version="1.1"
+ creator="Global Mapper - http://www.globalmapper.com"
+ xmlns:globalmapper="https://www.bluemarblegeo.com/globalmapper"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xmlns="http://www.topografix.com/GPX/1/1"
+ xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
+ <metadata>
+ </metadata>
+<trk>
+ <name>BUZZINO</name>
+ <desc>Tracklog</desc>
+ <trkseg>
+  <trkpt lat="42.96497400" lon="10.88032100">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96510200" lon="10.88037700">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96541000" lon="10.88045900">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96552800" lon="10.88052200">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96570000" lon="10.88066400">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96590500" lon="10.88086800">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96610600" lon="10.88093100">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96617200" lon="10.88091600">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96636000" lon="10.88095900">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96667300" lon="10.88106500">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96678300" lon="10.88123000">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96701300" lon="10.88136800">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96715700" lon="10.88141500">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96729800" lon="10.88140300">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96737200" lon="10.88143900">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96743900" lon="10.88141900">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96760800" lon="10.88142700">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96779800" lon="10.88139100">
+   <ele>0</ele>
+  </trkpt>
+  <trkpt lat="42.96789800" lon="10.88133400">
+   <ele>0</ele>
+  </trkpt>
+ </trkseg>
+</trk>
+ <extensions>
+ </extensions>
+</gpx>
