@@ -9,105 +9,70 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="SENTIERI.js"></script>
     <script src="POI.js"></script>
-    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #0f172a; margin: 0; overflow: hidden; }
         #map { height: calc(100vh - 120px); width: 100%; background: #1e293b; }
         .sidebar { height: calc(100vh - 120px); overflow-y: auto; background: #1e293b; border-right: 1px solid #334155; }
-        
         .bg-verde { background-color: #22c55e !important; }
         .bg-blu { background-color: #3b82f6 !important; }
         .bg-rosso { background-color: #ef4444 !important; }
         .bg-nero { background-color: #000000 !important; }
-
         .symbol { width: 14px; height: 14px; display: inline-block; border: 1px solid white; vertical-align: middle; }
         .circle { border-radius: 50%; }
         .square { border-radius: 2px; }
         .diamond { transform: rotate(45deg) scale(0.8); }
-
         @keyframes pulsePath {
             0% { stroke-width: 6; stroke-opacity: 0.9; }
             50% { stroke-width: 12; stroke-opacity: 0.6; }
             100% { stroke-width: 6; stroke-opacity: 0.9; }
         }
         .path-active { animation: pulsePath 1.2s infinite; }
-
-        #info-panel {
-            display: none; position: fixed; bottom: 30px; left: 400px; right: 30px;
-            z-index: 1000; background: white; padding: 25px; border-radius: 24px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
-        }
-
+        #info-panel { display: none; position: fixed; bottom: 30px; left: 400px; right: 30px; z-index: 1000; background: white; padding: 25px; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.6); }
         .qr-container { background: white; padding: 10px; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; min-width: 130px; min-height: 130px; }
         .filter-btn { transition: all 0.2s; border: 1px solid rgba(255,255,255,0.1); color: #94a3b8; }
         .filter-btn.active { background-color: #c5a059 !important; color: white; border-color: white; transform: scale(1.05); }
-
         .resort-marker { background: #c5a059; border: 3px solid white; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 900; }
-        
         .experience-card { background: #1e293b; border: 1px solid rgba(197, 160, 89, 0.2); transition: all 0.3s ease; }
-        .experience-card:hover { border-color: #c5a059; transform: translateY(-5px); }
     </style>
 </head>
 <body>
-
     <header class="h-[120px] bg-[#0f172a] border-b border-slate-800 flex items-center justify-between px-10 text-white relative">
         <div class="flex flex-col z-10">
-            <h1 class="text-4xl font-black tracking-[0.2em] text-[#c5a059] uppercase italic leading-none">Pelagone</h1>
-            <div class="flex items-center mt-1">
-                <div class="h-[2px] w-8 bg-[#c5a059] mr-3"></div>
-                <span class="text-xs tracking-[0.5em] uppercase opacity-80 font-light">Experience Hub</span>
-            </div>
+            <h1 class="text-4xl font-black tracking-[0.2em] text-[#c5a059] uppercase italic">Pelagone</h1>
+            <span class="text-xs tracking-[0.5em] uppercase opacity-80">Experience Hub</span>
         </div>
-
         <div class="flex space-x-2 z-10">
             <button onclick="filterTrails('all')" id="f-all" class="filter-btn active bg-slate-800/50 px-5 py-2 rounded-full text-[10px] font-black uppercase">Tutti</button>
             <button onclick="filterTrails('easy')" id="f-easy" class="filter-btn bg-slate-800/50 px-5 py-2 rounded-full text-[10px] font-black uppercase">Family</button>
             <button onclick="filterTrails('pro')" id="f-pro" class="filter-btn bg-slate-800/50 px-5 py-2 rounded-full text-[10px] font-black uppercase">Pro Riders</button>
         </div>
-
-        <div class="flex items-center space-x-6 z-10">
-            <button onclick="toggleExperiences()" class="bg-[#c5a059] hover:bg-[#b08d4a] text-white px-6 py-3 rounded-full text-[10px] font-black uppercase shadow-lg transition-all transform hover:scale-105">
-                ⭐ Prenota Esperienze
-            </button>
-        </div>
+        <button onclick="toggleExperiences()" class="bg-[#c5a059] text-white px-6 py-3 rounded-full text-[10px] font-black uppercase shadow-lg">⭐ Prenota Esperienze</button>
     </header>
 
     <main class="flex">
-        <aside class="sidebar w-[380px] p-4">
-            <div id="trail-list" class="space-y-2 pt-2"></div>
-        </aside>
-
+        <aside class="sidebar w-[380px] p-4"><div id="trail-list" class="space-y-2 pt-2"></div></aside>
         <section class="flex-1 relative">
             <div id="map"></div>
-            
             <div id="info-panel">
                 <div class="flex justify-between items-center">
                     <div class="flex-1">
-                        <div class="flex items-center space-x-3 mb-4">
-                            <h2 id="ui-nome" class="text-3xl font-black uppercase text-slate-800 leading-none tracking-tight">Nome Trail</h2>
-                            <div id="ui-status-badge" class="bg-red-600 text-white text-[10px] font-black px-2 py-1 rounded hidden italic uppercase tracking-tighter">Chiuso</div>
-                        </div>
-                        <button id="btn-download" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-2xl text-[12px] font-black uppercase tracking-widest shadow-xl transition-all active:scale-95">
-                            📂 Download GPX
-                        </button>
+                        <h2 id="ui-nome" class="text-3xl font-black uppercase text-slate-800 mb-4">Nome Trail</h2>
+                        <button id="btn-download" class="bg-blue-600 text-white px-8 py-4 rounded-2xl text-[12px] font-black uppercase tracking-widest shadow-xl">📂 Download GPX</button>
                     </div>
-
-                    <div class="flex flex-col items-center ml-8 border-l pl-8 border-slate-100">
+                    <div class="flex flex-col items-center ml-8 border-l pl-8">
                         <div id="qrcode" class="qr-container"></div>
-                        <span class="text-[9px] font-black text-slate-400 uppercase mt-2 tracking-widest">Scan to Mobile</span>
                     </div>
-                    
-                    <button onclick="closePanel()" class="absolute top-4 right-6 text-slate-300 hover:text-slate-600 text-2xl transition-colors">✕</button>
+                    <button onclick="closePanel()" class="absolute top-4 right-6 text-slate-300 text-2xl">✕</button>
                 </div>
             </div>
         </section>
     </main>
 
     <div id="experience-overlay" class="fixed inset-0 z-[3000] bg-[#0f172a]/95 hidden p-10 overflow-y-auto">
-        <div class="flex justify-between items-center mb-10 max-w-7xl mx-auto">
-            <h2 class="text-4xl font-black text-white uppercase italic tracking-tighter leading-none">Weekly Experience Hub</h2>
-            <button onclick="toggleExperiences()" class="bg-white/10 hover:bg-white/20 text-white w-12 h-12 rounded-full text-2xl transition-all">✕</button>
+        <div class="flex justify-between items-center mb-10 max-w-7xl mx-auto text-white">
+            <h2 class="text-4xl font-black uppercase italic">Weekly Experience Hub</h2>
+            <button onclick="toggleExperiences()" class="text-2xl">✕</button>
         </div>
         <div id="experience-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto"></div>
     </div>
@@ -121,83 +86,45 @@
         L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png').addTo(map);
         L.marker(RESORT_COORDS, { icon: L.divIcon({ className: 'resort-marker', html: 'H', iconSize: [36, 36] }) }).addTo(map);
 
-        let trailStatus = JSON.parse(localStorage.getItem('pelagone_trail_state')) || {};
         let geoJsonLayer, lastLayer = null;
-
-        const hexMap = { "verde": "#22c55e", "blu": "#3b82f6", "rosso": "#ef4444", "nero": "#000000" };
-        const tailwindBg = { "verde": "bg-verde", "blu": "bg-blu", "rosso": "bg-rosso", "nero": "bg-nero" };
-
         const trailTable = {
-            "SANTANSANO": { col: "rosso", sym: "square", fun: "O" },
-            "COMO HD": { col: "rosso", sym: "square", fun: "O" }, 
-            "ROGNOSO": { col: "rosso", sym: "square", fun: "O" },
-            "DH AIONE": { col: "rosso", sym: "square", fun: "O" },
-            "CESSA RIGATTAIE": { col: "rosso", sym: "square", fun: "S" },
-            "AVVOLTORE": { col: "blu", sym: "circle", fun: "S" },
-            "AINA": { col: "verde", sym: "circle", fun: "S" },
-            "COMO EASY": { col: "blu", sym: "circle", fun: "O" },
-            "PRISON BREAK": { col: "nero", sym: "diamond", fun: "S" },
-            "BUZZINO": { col: "rosso", sym: "square", fun: "O" }
+            "SANTANSANO": { col: "rosso", sym: "square" }, "COMO HD": { col: "rosso", sym: "square" }, "ROGNOSO": { col: "rosso", sym: "square" },
+            "DH AIONE": { col: "rosso", sym: "square" }, "CESSA RIGATTAIE": { col: "rosso", sym: "square" }, "AVVOLTORE": { col: "blu", sym: "circle" },
+            "AINA": { col: "verde", sym: "circle" }, "COMO EASY": { col: "blu", sym: "circle" }, "PRISON BREAK": { col: "nero", sym: "diamond" }, "BUZZINO": { col: "rosso", sym: "square" }
         };
 
-        function toggleExperiences() {
-            const overlay = document.getElementById('experience-overlay');
-            overlay.classList.toggle('hidden');
-            if (!overlay.classList.contains('hidden')) renderExperiences();
-        }
+        function toggleExperiences() { document.getElementById('experience-overlay').classList.toggle('hidden'); if (!document.getElementById('experience-overlay').classList.contains('hidden')) renderExperiences(); }
 
         async function renderExperiences() {
             const grid = document.getElementById('experience-grid');
-            grid.innerHTML = '<p class="text-white text-center col-span-full">Sincronizzazione...</p>';
+            grid.innerHTML = '<p class="text-white text-center col-span-full italic">Sincronizzazione...</p>';
             try {
                 const proxyUrl = "https://corsproxy.io/?";
-                const targetUrl = SHEET_CSV_URL + "&cb=" + new Date().getTime();
-                const response = await fetch(proxyUrl + encodeURIComponent(targetUrl));
+                const response = await fetch(proxyUrl + encodeURIComponent(SHEET_CSV_URL + "&cb=" + Date.now()));
                 const data = await response.text();
-                const rows = data.split(/\r?\n/).filter(row => row.trim() !== '').slice(1); 
-                grid.innerHTML = ''; 
+                const rows = data.split(/\r?\n/).filter(row => row.trim() !== '').slice(1);
+                grid.innerHTML = '';
                 rows.forEach(row => {
                     const cols = row.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g);
-                    if (!cols || cols.length < 7) return; 
+                    if (!cols || cols.length < 7) return;
                     const titolo = cols[0].replace(/^"|"$/g, '').trim();
                     const guida = cols[1].replace(/^"|"$/g, '').trim();
                     const desc = cols[2].replace(/^"|"$/g, '').trim();
                     const diffInput = cols[3].replace(/^"|"$/g, '').trim().toLowerCase();
                     const costo = cols[4].replace(/^"|"$/g, '').trim();
-                    const linkWeb = cols[5].replace(/^"|"$/g, '').trim();
                     const cell = cols[6].replace(/^"|"$/g, '').trim();
                     const diff = diffInput || "verde";
-                    const symMap = { "verde": "circle", "blu": "circle", "rosso": "square", "nero": "diamond" };
-                    let cleanCell = cell.replace(/\D/g, ''); 
-                    let waLink = "#";
-                    if (cleanCell.length >= 9) {
-                        if (!cleanCell.startsWith('39')) cleanCell = '39' + cleanCell;
-                        waLink = `https://wa.me/${cleanCell}?text=${encodeURIComponent('Ciao, vorrei info per: ' + titolo)}`;
-                    } else if (linkWeb && linkWeb !== "#") {
-                        waLink = linkWeb;
-                    }
+                    const tailBg = { "verde": "bg-verde", "blu": "bg-blu", "rosso": "bg-rosso", "nero": "bg-nero" };
+                    let cleanCell = cell.replace(/\D/g, '');
+                    if (cleanCell.length >= 9 && !cleanCell.startsWith('39')) cleanCell = '39' + cleanCell;
+                    const waLink = cleanCell.length >= 9 ? `https://wa.me/${cleanCell}?text=${encodeURIComponent('Ciao, info per: ' + titolo)}` : "#";
+                    
                     const card = document.createElement('div');
                     card.className = "experience-card p-8 rounded-3xl flex flex-col justify-between shadow-2xl border border-white/5";
-                    card.innerHTML = `
-                        <div>
-                            <div class="flex justify-between items-start mb-6">
-                                <div class="bg-white/10 px-4 py-2 rounded-xl border border-white/5">
-                                    <span class="text-white font-black text-xl italic">€ ${costo}</span>
-                                </div>
-                                <div class="symbol ${symMap[diff]} ${tailwindBg[diff]} scale-125"></div>
-                            </div>
-                            <h3 class="text-2xl font-black text-white uppercase leading-tight mb-2 tracking-tighter">${titolo}</h3>
-                            <p class="text-[#c5a059] font-bold text-[10px] uppercase mb-4 tracking-widest">Guida: ${guida}</p>
-                            <p class="text-slate-400 text-sm leading-relaxed mb-6 italic line-clamp-3">"${desc}"</p>
-                        </div>
-                        <a href="${waLink}" target="_blank" class="bg-[#c5a059] text-white text-center py-4 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-[#b08d4a] transition-all">
-                            Prenota via WhatsApp
-                        </a>`;
+                    card.innerHTML = `<div><div class="flex justify-between items-start mb-6"><div class="bg-white/10 px-4 py-2 rounded-xl text-white font-black italic">€ ${costo}</div><div class="symbol circle ${tailBg[diff]} scale-125"></div></div><h3 class="text-2xl font-black text-white uppercase mb-2 leading-none">${titolo}</h3><p class="text-[#c5a059] font-bold text-[10px] uppercase mb-4 tracking-widest">Guida: ${guida}</p><p class="text-slate-400 text-sm italic mb-6">"${desc}"</p></div><a href="${waLink}" target="_blank" class="bg-[#c5a059] text-white text-center py-4 rounded-2xl font-black uppercase text-xs tracking-widest transition-all">Prenota via WhatsApp</a>`;
                     grid.appendChild(card);
                 });
-            } catch (e) {
-                grid.innerHTML = '<p class="text-red-500 text-center col-span-full">Errore di Sincronizzazione.</p>';
-            }
+            } catch (e) { grid.innerHTML = '<p class="text-red-500 text-center col-span-full">Errore caricamento dati.</p>'; }
         }
 
         function renderList(filter = 'all') {
@@ -206,36 +133,26 @@
             list.innerHTML = '';
             geoJsonLayer.eachLayer(layer => {
                 const nome = layer.feature.properties.NOME;
-                const cfg = trailTable[nome] || { col: "blu", sym: "circle", fun: "S" };
-                const isClosed = trailStatus[nome];
-                layer.setStyle({ color: isClosed ? '#fbbf24' : hexMap[cfg.col], weight: 6, dashArray: isClosed ? '10, 10' : null });
-                const show = (filter === 'all') || (filter === 'easy' && (cfg.col === 'verde' || cfg.col === 'blu')) || (filter === 'pro' && (cfg.col === 'rosso' || cfg.col === 'nero'));
-                if (show) {
+                const cfg = trailTable[nome] || { col: "blu", sym: "circle" };
+                const hexMap = { "verde": "#22c55e", "blu": "#3b82f6", "rosso": "#ef4444", "nero": "#000000" };
+                const tailBg = { "verde": "bg-verde", "blu": "bg-blu", "rosso": "bg-rosso", "nero": "bg-nero" };
+                layer.setStyle({ color: hexMap[cfg.col], weight: 6 });
+                if (filter === 'all' || (filter === 'easy' && (cfg.col === 'verde' || cfg.col === 'blu')) || (filter === 'pro' && (cfg.col === 'rosso' || cfg.col === 'nero'))) {
                     const card = document.createElement('div');
-                    card.className = `p-4 mx-2 rounded-2xl flex justify-between items-center text-white cursor-pointer hover:scale-[1.02] transition-all ${isClosed ? 'bg-slate-600' : tailwindBg[cfg.col]}`;
-                    card.innerHTML = `<div><span class="font-black uppercase text-[11px] leading-none">${nome}</span></div><div class="symbol ${cfg.sym} bg-white/20"></div>`;
+                    card.className = `p-4 mx-2 rounded-2xl flex justify-between items-center text-white cursor-pointer hover:scale-[1.02] transition-all ${tailBg[cfg.col]}`;
+                    card.innerHTML = `<span class="font-black uppercase text-[11px] leading-none">${nome}</span><div class="symbol ${cfg.sym} bg-white/20"></div>`;
                     card.onclick = () => {
                         if (lastLayer) lastLayer.getElement().classList.remove('path-active');
                         map.fitBounds(layer.getBounds(), { padding: [100, 100] });
                         layer.getElement().classList.add('path-active');
                         lastLayer = layer;
                         document.getElementById('ui-nome').innerText = nome;
-                        document.getElementById('ui-status-badge').style.display = isClosed ? 'block' : 'none';
                         document.getElementById('info-panel').style.display = 'block';
-                        const qrElement = document.getElementById("qrcode");
-                        qrElement.innerHTML = "";
                         const fileName = nome.trim().toLowerCase().replace(/\s+/g, '_') + ".gpx";
-                        const linkFinale = BASE_URL_GPX + fileName;
-                        new QRCode(qrElement, { text: linkFinale, width: 120, height: 120 });
-                        document.getElementById('btn-download').onclick = () => {
-                            const a = document.createElement('a');
-                            a.href = linkFinale;
-                            a.download = fileName;
-                            a.target = "_blank";
-                            document.body.appendChild(a);
-                            a.click();
-                            document.body.removeChild(a);
-                        };
+                        const finalLink = BASE_URL_GPX + fileName;
+                        document.getElementById('qrcode').innerHTML = "";
+                        new QRCode(document.getElementById('qrcode'), { text: finalLink, width: 120, height: 120 });
+                        document.getElementById('btn-download').onclick = () => { window.open(finalLink, '_blank'); };
                     };
                     list.appendChild(card);
                     layer.addTo(map);
@@ -243,17 +160,9 @@
             });
         }
 
-        function filterTrails(type) {
-            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-            document.getElementById('f-' + type).classList.add('active');
-            renderList(type);
-        }
-
-        if (typeof datiSentieri !== 'undefined') {
-            geoJsonLayer = L.geoJSON(datiSentieri);
-            renderList();
-        }
+        function filterTrails(type) { document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active')); document.getElementById('f-' + type).classList.add('active'); renderList(type); }
         function closePanel() { document.getElementById('info-panel').style.display = 'none'; }
+        if (typeof datiSentieri !== 'undefined') { geoJsonLayer = L.geoJSON(datiSentieri); renderList(); }
     </script>
 </body>
 </html>
