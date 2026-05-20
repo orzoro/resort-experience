@@ -231,25 +231,45 @@
                     const card = document.createElement('div');
                     card.className = `p-4 mx-2 rounded-2xl flex justify-between items-center text-white cursor-pointer hover:scale-[1.02] transition-all ${isClosed ? 'bg-slate-600' : tailwindBg[cfg.col]}`;
                     card.innerHTML = `<div><span class="font-black uppercase text-[11px] leading-none">${nome}</span></div><div class="symbol ${cfg.sym} bg-white/20"></div>`;
-                    card.onclick = () => {
-                        if (lastLayer) lastLayer.getElement().classList.remove('path-active');
-                        map.fitBounds(layer.getBounds(), { padding: [100, 100] });
-                        layer.getElement().classList.add('path-active');
-                        lastLayer = layer;
-                        document.getElementById('ui-nome').innerText = nome;
-                        document.getElementById('ui-status-badge').style.display = isClosed ? 'block' : 'none';
-                        document.getElementById('info-panel').style.display = 'block';
-                        const qrElement = document.getElementById("qrcode");
-                        qrElement.innerHTML = "";
-                        const fileName = nome.toLowerCase().replace(/\s+/g, '_') + ".gpx";
-                        new QRCode(qrElement, { text: BASE_URL_GPX + fileName, width: 120, height: 120 });
-                        document.getElementById('btn-download').onclick = () => window.open(BASE_URL_GPX + fileName, '_blank');
-                    };
-                    list.appendChild(card);
-                    layer.addTo(map);
-                } else { map.removeLayer(layer); }
-            });
-        }
+                    // Cerca questa riga nel tuo index.html e sostituisci il blocco card.onclick
+card.onclick = () => {
+    if (lastLayer) lastLayer.getElement().classList.remove('path-active');
+    map.fitBounds(layer.getBounds(), { padding: [100, 100] });
+    layer.getElement().classList.add('path-active');
+    lastLayer = layer;
+
+    document.getElementById('ui-nome').innerText = nome;
+    document.getElementById('ui-status-badge').style.display = isClosed ? 'block' : 'none';
+    document.getElementById('info-panel').style.display = 'block';
+
+    const qrElement = document.getElementById("qrcode");
+    qrElement.innerHTML = "";
+
+    // --- LOGICA CORRETTA PER IL NOME FILE ---
+    // 1. Prende il nome (es: "COMO HD")
+    // 2. Lo trasforma tutto in minuscolo ("como hd")
+    // 3. Sostituisce lo spazio con l'underscore ("como_hd")
+    // 4. Toglie eventuali spazi doppi o strani
+    const nomeFilePulito = nome.trim().toLowerCase().replace(/\s+/g, '_');
+    const linkFinaleGPX = BASE_URL_GPX + nomeFilePulito + ".gpx";
+
+    // Debug: stampa il link in console (F12) per vedere se è giusto
+    console.log("Link generato:", linkFinaleGPX);
+
+    // Genera QR Code
+    new QRCode(qrElement, { text: linkFinaleGPX, width: 120, height: 120 });
+
+    // Funzione tasto download
+    document.getElementById('btn-download').onclick = () => {
+        const link = document.createElement('a');
+        link.href = linkFinaleGPX;
+        link.download = nomeFilePulito + ".gpx";
+        link.target = "_blank"; // Forza l'apertura in caso di blocco
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+};
 
         function filterTrails(type) {
             document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
