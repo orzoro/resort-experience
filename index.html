@@ -33,13 +33,12 @@
         .filter-btn { transition: all 0.2s; border: 1px solid rgba(255,255,255,0.1); color: #94a3b8; }
         .filter-btn.active { background-color: #c5a059 !important; color: white; border-color: white; transform: scale(1.05); }
         .resort-marker { background: #c5a059; border: 3px solid white; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 900; }
-        .experience-card { background: #1e293b; border: 1px solid rgba(197, 160, 89, 0.2); transition: all 0.3s ease; }
     </style>
 </head>
 <body>
     <header class="h-[120px] bg-[#0f172a] border-b border-slate-800 flex items-center justify-between px-10 text-white relative">
         <div class="flex flex-col z-10">
-            <h1 class="text-4xl font-black tracking-[0.2em] text-[#c5a059] uppercase italic">Pelagone</h1>
+            <h1 class="text-4xl font-black tracking-[0.2em] text-[#c5a059] uppercase italic leading-none">Pelagone</h1>
             <span class="text-xs tracking-[0.5em] uppercase opacity-80">Experience Hub</span>
         </div>
         <div class="flex space-x-2 z-10">
@@ -57,7 +56,10 @@
             <div id="info-panel">
                 <div class="flex justify-between items-center">
                     <div class="flex-1">
-                        <h2 id="ui-nome" class="text-3xl font-black uppercase text-slate-800 mb-4">Nome Trail</h2>
+                        <div class="flex items-center space-x-3 mb-4">
+                            <h2 id="ui-nome" class="text-3xl font-black uppercase text-slate-800 leading-none">Nome Trail</h2>
+                            <div id="ui-status-badge" class="bg-amber-500 text-white text-[10px] font-black px-2 py-1 rounded hidden uppercase italic">Manutenzione</div>
+                        </div>
                         <button id="btn-download" class="bg-blue-600 text-white px-8 py-4 rounded-2xl text-[12px] font-black uppercase tracking-widest shadow-xl">📂 Download GPX</button>
                     </div>
                     <div class="flex flex-col items-center ml-8 border-l pl-8">
@@ -71,7 +73,7 @@
 
     <div id="experience-overlay" class="fixed inset-0 z-[3000] bg-[#0f172a]/95 hidden p-10 overflow-y-auto">
         <div class="flex justify-between items-center mb-10 max-w-7xl mx-auto text-white">
-            <h2 class="text-4xl font-black uppercase italic">Weekly Experience Hub</h2>
+            <h2 class="text-4xl font-black uppercase italic leading-none">Weekly Experience Hub</h2>
             <button onclick="toggleExperiences()" class="text-2xl">✕</button>
         </div>
         <div id="experience-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto"></div>
@@ -79,52 +81,44 @@
 
     <script>
         const RESORT_COORDS = [42.9635639, 10.8630999];
-        const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTROGsq0FZj3cnpRrqco8JWrjUt4I_d9b1aU1sF5TKrC7474hbQ1d8BtwNibjZFjPlnoplVPSwVw3vu/pub?gid=0&single=true&output=csv";
+        const SHEET_MANUTENZIONE_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSc0LjAfvMuepPzsxcOWuAvykxmW16NwcYSIH7vbPdiKulIUOBMTqBXzsR1fGuClt-tB54O5HzLfHZp/pub?gid=0&single=true&output=csv";
+        const SHEET_EXPERIENCE_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTROGsq0FZj3cnpRrqco8JWrjUt4I_d9b1aU1sF5TKrC7474hbQ1d8BtwNibjZFjPlnoplVPSwVw3vu/pub?gid=0&single=true&output=csv";
         const BASE_URL_GPX = "https://orzor.github.io/resort-experience/gpx/";
 
         const map = L.map('map', { zoomControl: false }).setView(RESORT_COORDS, 14);
         L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png').addTo(map);
         L.marker(RESORT_COORDS, { icon: L.divIcon({ className: 'resort-marker', html: 'H', iconSize: [36, 36] }) }).addTo(map);
 
+        let trailStatus = {};
         let geoJsonLayer, lastLayer = null;
+
         const trailTable = {
             "SANTANSANO": { col: "rosso", sym: "square" }, "COMO HD": { col: "rosso", sym: "square" }, "ROGNOSO": { col: "rosso", sym: "square" },
             "DH AIONE": { col: "rosso", sym: "square" }, "CESSA RIGATTAIE": { col: "rosso", sym: "square" }, "AVVOLTORE": { col: "blu", sym: "circle" },
             "AINA": { col: "verde", sym: "circle" }, "COMO EASY": { col: "blu", sym: "circle" }, "PRISON BREAK": { col: "nero", sym: "diamond" }, "BUZZINO": { col: "rosso", sym: "square" }
         };
 
-        function toggleExperiences() { document.getElementById('experience-overlay').classList.toggle('hidden'); if (!document.getElementById('experience-overlay').classList.contains('hidden')) renderExperiences(); }
-
-        async function renderExperiences() {
-            const grid = document.getElementById('experience-grid');
-            grid.innerHTML = '<p class="text-white text-center col-span-full italic">Sincronizzazione...</p>';
+        async function caricaDatiManutenzione() {
             try {
                 const proxyUrl = "https://corsproxy.io/?";
-                const response = await fetch(proxyUrl + encodeURIComponent(SHEET_CSV_URL + "&cb=" + Date.now()));
+                const response = await fetch(proxyUrl + encodeURIComponent(SHEET_MANUTENZIONE_URL + "&cb=" + Date.now()));
                 const data = await response.text();
                 const rows = data.split(/\r?\n/).filter(row => row.trim() !== '').slice(1);
-                grid.innerHTML = '';
+                trailStatus = {};
                 rows.forEach(row => {
-                    const cols = row.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g);
-                    if (!cols || cols.length < 7) return;
-                    const titolo = cols[0].replace(/^"|"$/g, '').trim();
-                    const guida = cols[1].replace(/^"|"$/g, '').trim();
-                    const desc = cols[2].replace(/^"|"$/g, '').trim();
-                    const diffInput = cols[3].replace(/^"|"$/g, '').trim().toLowerCase();
-                    const costo = cols[4].replace(/^"|"$/g, '').trim();
-                    const cell = cols[6].replace(/^"|"$/g, '').trim();
-                    const diff = diffInput || "verde";
-                    const tailBg = { "verde": "bg-verde", "blu": "bg-blu", "rosso": "bg-rosso", "nero": "bg-nero" };
-                    let cleanCell = cell.replace(/\D/g, '');
-                    if (cleanCell.length >= 9 && !cleanCell.startsWith('39')) cleanCell = '39' + cleanCell;
-                    const waLink = cleanCell.length >= 9 ? `https://wa.me/${cleanCell}?text=${encodeURIComponent('Ciao, info per: ' + titolo)}` : "#";
-                    
-                    const card = document.createElement('div');
-                    card.className = "experience-card p-8 rounded-3xl flex flex-col justify-between shadow-2xl border border-white/5";
-                    card.innerHTML = `<div><div class="flex justify-between items-start mb-6"><div class="bg-white/10 px-4 py-2 rounded-xl text-white font-black italic">€ ${costo}</div><div class="symbol circle ${tailBg[diff]} scale-125"></div></div><h3 class="text-2xl font-black text-white uppercase mb-2 leading-none">${titolo}</h3><p class="text-[#c5a059] font-bold text-[10px] uppercase mb-4 tracking-widest">Guida: ${guida}</p><p class="text-slate-400 text-sm italic mb-6">"${desc}"</p></div><a href="${waLink}" target="_blank" class="bg-[#c5a059] text-white text-center py-4 rounded-2xl font-black uppercase text-xs tracking-widest transition-all">Prenota via WhatsApp</a>`;
-                    grid.appendChild(card);
+                    const cols = row.split(',');
+                    if(cols.length >= 2) {
+                        const nome = cols[0].trim().toUpperCase();
+                        const stato = cols[1].trim().toUpperCase();
+                        if (stato === "CHIUSO" || stato === "MANUTENZIONE") trailStatus[nome] = true;
+                    }
                 });
-            } catch (e) { grid.innerHTML = '<p class="text-red-500 text-center col-span-full">Errore caricamento dati.</p>'; }
+                if (typeof datiSentieri !== 'undefined') {
+                    if (geoJsonLayer) map.removeLayer(geoJsonLayer);
+                    geoJsonLayer = L.geoJSON(datiSentieri);
+                    renderList();
+                }
+            } catch (e) { console.error("Errore foglio manutenzione", e); }
         }
 
         function renderList(filter = 'all') {
@@ -133,23 +127,27 @@
             list.innerHTML = '';
             geoJsonLayer.eachLayer(layer => {
                 const nome = layer.feature.properties.NOME;
+                const isClosed = trailStatus[nome] === true;
                 const cfg = trailTable[nome] || { col: "blu", sym: "circle" };
                 const hexMap = { "verde": "#22c55e", "blu": "#3b82f6", "rosso": "#ef4444", "nero": "#000000" };
                 const tailBg = { "verde": "bg-verde", "blu": "bg-blu", "rosso": "bg-rosso", "nero": "bg-nero" };
-                layer.setStyle({ color: hexMap[cfg.col], weight: 6 });
+                
+                layer.setStyle({ color: isClosed ? '#f59e0b' : hexMap[cfg.col], weight: 6, dashArray: isClosed ? '10, 15' : null });
+
                 if (filter === 'all' || (filter === 'easy' && (cfg.col === 'verde' || cfg.col === 'blu')) || (filter === 'pro' && (cfg.col === 'rosso' || cfg.col === 'nero'))) {
                     const card = document.createElement('div');
-                    card.className = `p-4 mx-2 rounded-2xl flex justify-between items-center text-white cursor-pointer hover:scale-[1.02] transition-all ${tailBg[cfg.col]}`;
-                    card.innerHTML = `<span class="font-black uppercase text-[11px] leading-none">${nome}</span><div class="symbol ${cfg.sym} bg-white/20"></div>`;
+                    card.className = `p-4 mx-2 rounded-2xl flex justify-between items-center text-white cursor-pointer hover:scale-[1.02] transition-all ${isClosed ? 'bg-amber-600 opacity-90' : tailBg[cfg.col]}`;
+                    card.innerHTML = `<span class="font-black uppercase text-[11px] leading-none">${isClosed ? '⚠️ ' : ''}${nome}</span><div class="symbol ${cfg.sym} bg-white/20"></div>`;
                     card.onclick = () => {
                         if (lastLayer) lastLayer.getElement().classList.remove('path-active');
                         map.fitBounds(layer.getBounds(), { padding: [100, 100] });
                         layer.getElement().classList.add('path-active');
                         lastLayer = layer;
                         document.getElementById('ui-nome').innerText = nome;
+                        document.getElementById('ui-status-badge').style.display = isClosed ? 'block' : 'none';
                         document.getElementById('info-panel').style.display = 'block';
-                        const fileName = nome.trim().toLowerCase().replace(/\s+/g, '_') + ".gpx";
-                        const finalLink = BASE_URL_GPX + fileName;
+                        const nomeFileGPX = nome.toLowerCase().trim().replace(/\s+/g, '_') + ".gpx";
+                        const finalLink = BASE_URL_GPX + nomeFileGPX;
                         document.getElementById('qrcode').innerHTML = "";
                         new QRCode(document.getElementById('qrcode'), { text: finalLink, width: 120, height: 120 });
                         document.getElementById('btn-download').onclick = () => { window.open(finalLink, '_blank'); };
@@ -160,9 +158,45 @@
             });
         }
 
+        function toggleExperiences() {
+            const overlay = document.getElementById('experience-overlay');
+            overlay.classList.toggle('hidden');
+            if (!overlay.classList.contains('hidden')) renderExperiences();
+        }
+
+        async function renderExperiences() {
+            const grid = document.getElementById('experience-grid');
+            grid.innerHTML = '<p class="text-white text-center col-span-full">Caricamento...</p>';
+            try {
+                const proxyUrl = "https://corsproxy.io/?";
+                const response = await fetch(proxyUrl + encodeURIComponent(SHEET_EXPERIENCE_URL + "&cb=" + Date.now()));
+                const data = await response.text();
+                const rows = data.split(/\r?\n/).filter(row => row.trim() !== '').slice(1);
+                grid.innerHTML = '';
+                rows.forEach(row => {
+                    const cols = row.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g);
+                    if (!cols || cols.length < 7) return;
+                    const titolo = cols[0].replace(/^"|"$/g, '').trim();
+                    const guida = cols[1].replace(/^"|"$/g, '').trim();
+                    const desc = cols[2].replace(/^"|"$/g, '').trim();
+                    const costo = cols[4].replace(/^"|"$/g, '').trim();
+                    const cell = cols[6].replace(/^"|"$/g, '').trim();
+                    let cleanCell = cell.replace(/\D/g, '');
+                    if (cleanCell.length >= 9 && !cleanCell.startsWith('39')) cleanCell = '39' + cleanCell;
+                    const waLink = cleanCell.length >= 9 ? `https://wa.me/${cleanCell}?text=${encodeURIComponent('Ciao, info per: ' + titolo)}` : "#";
+                    const card = document.createElement('div');
+                    card.className = "p-8 rounded-3xl flex flex-col justify-between shadow-2xl bg-[#1e293b] border border-white/5";
+                    card.innerHTML = `<div><div class="bg-white/10 w-fit px-4 py-2 rounded-xl text-white font-black italic mb-6">€ ${costo}</div><h3 class="text-2xl font-black text-white uppercase mb-2 leading-none">${titolo}</h3><p class="text-[#c5a059] font-bold text-[10px] uppercase mb-4">Guida: ${guida}</p><p class="text-slate-400 text-sm italic mb-6">"${desc}"</p></div><a href="${waLink}" target="_blank" class="bg-[#c5a059] text-white text-center py-4 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-[#b08d4a] transition-all">Prenota via WhatsApp</a>`;
+                    grid.appendChild(card);
+                });
+            } catch (e) { grid.innerHTML = '<p class="text-red-500 text-center">Errore caricamento esperienze.</p>'; }
+        }
+
         function filterTrails(type) { document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active')); document.getElementById('f-' + type).classList.add('active'); renderList(type); }
         function closePanel() { document.getElementById('info-panel').style.display = 'none'; }
-        if (typeof datiSentieri !== 'undefined') { geoJsonLayer = L.geoJSON(datiSentieri); renderList(); }
+        
+        caricaDatiManutenzione();
+        setInterval(caricaDatiManutenzione, 60000); // Controlla il foglio ogni minuto
     </script>
 </body>
 </html>
