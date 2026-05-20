@@ -244,22 +244,12 @@ card.onclick = () => {
 
     const qrElement = document.getElementById("qrcode");
     qrElement.innerHTML = "";
-
-    // --- LOGICA CORRETTA PER IL NOME FILE ---
-    // 1. Prende il nome (es: "COMO HD")
-    // 2. Lo trasforma tutto in minuscolo ("como hd")
-    // 3. Sostituisce lo spazio con l'underscore ("como_hd")
-    // 4. Toglie eventuali spazi doppi o strani
     const nomeFilePulito = nome.trim().toLowerCase().replace(/\s+/g, '_');
     const linkFinaleGPX = BASE_URL_GPX + nomeFilePulito + ".gpx";
 
-    // Debug: stampa il link in console (F12) per vedere se è giusto
     console.log("Link generato:", linkFinaleGPX);
 
-    // Genera QR Code
     new QRCode(qrElement, { text: linkFinaleGPX, width: 120, height: 120 });
-
-    // Funzione tasto download
     document.getElementById('btn-download').onclick = () => {
         const link = document.createElement('a');
         link.href = linkFinaleGPX;
