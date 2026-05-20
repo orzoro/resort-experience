@@ -138,19 +138,34 @@
                     const card = document.createElement('div');
                     card.className = `p-4 mx-2 rounded-2xl flex justify-between items-center text-white cursor-pointer hover:scale-[1.02] transition-all ${isClosed ? 'bg-amber-600 opacity-90' : tailBg[cfg.col]}`;
                     card.innerHTML = `<span class="font-black uppercase text-[11px] leading-none">${isClosed ? '⚠️ ' : ''}${nome}</span><div class="symbol ${cfg.sym} bg-white/20"></div>`;
+                    
                     card.onclick = () => {
                         if (lastLayer) lastLayer.getElement().classList.remove('path-active');
                         map.fitBounds(layer.getBounds(), { padding: [100, 100] });
                         layer.getElement().classList.add('path-active');
                         lastLayer = layer;
+                        
                         document.getElementById('ui-nome').innerText = nome;
                         document.getElementById('ui-status-badge').style.display = isClosed ? 'block' : 'none';
                         document.getElementById('info-panel').style.display = 'block';
+                        
+                        // --- NUOVA FUNZIONE DOWNLOAD PULITA ---
                         const nomeFileGPX = nome.toLowerCase().trim().replace(/\s+/g, '_') + ".gpx";
                         const finalLink = BASE_URL_GPX + nomeFileGPX;
+
+                        // Genera QR Code
                         document.getElementById('qrcode').innerHTML = "";
-                        new QRCode(document.getElementById('qrcode'), { text: finalLink, width: 120, height: 120 });
-                        document.getElementById('btn-download').onclick = () => { window.open(finalLink, '_blank'); };
+                        new QRCode(document.getElementById('qrcode'), { 
+                            text: finalLink, 
+                            width: 120, 
+                            height: 120,
+                            correctLevel : QRCode.CorrectLevel.H 
+                        });
+
+                        // Imposta azione pulsante Download
+                        document.getElementById('btn-download').onclick = () => { 
+                            window.open(finalLink, '_blank'); 
+                        };
                     };
                     list.appendChild(card);
                     layer.addTo(map);
@@ -196,7 +211,7 @@
         function closePanel() { document.getElementById('info-panel').style.display = 'none'; }
         
         caricaDatiManutenzione();
-        setInterval(caricaDatiManutenzione, 60000); // Controlla il foglio ogni minuto
+        setInterval(caricaDatiManutenzione, 60000); 
     </script>
 </body>
 </html>
