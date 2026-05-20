@@ -81,6 +81,7 @@
 
     <script>
         const RESORT_COORDS = [42.9635639, 10.8630999];
+        // LINK FOGLIO GOOGLE MANUTENZIONE (STRADA B)
         const SHEET_MANUTENZIONE_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSc0LjAfvMuepPzsxcOWuAvykxmW16NwcYSIH7vbPdiKulIUOBMTqBXzsR1fGuClt-tB54O5HzLfHZp/pub?gid=0&single=true&output=csv";
         const SHEET_EXPERIENCE_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTROGsq0FZj3cnpRrqco8JWrjUt4I_d9b1aU1sF5TKrC7474hbQ1d8BtwNibjZFjPlnoplVPSwVw3vu/pub?gid=0&single=true&output=csv";
         const BASE_URL_GPX = "https://orzor.github.io/resort-experience/gpx/";
@@ -95,7 +96,8 @@
         const trailTable = {
             "SANTANSANO": { col: "rosso", sym: "square" }, "COMO HD": { col: "rosso", sym: "square" }, "ROGNOSO": { col: "rosso", sym: "square" },
             "DH AIONE": { col: "rosso", sym: "square" }, "CESSA RIGATTAIE": { col: "rosso", sym: "square" }, "AVVOLTORE": { col: "blu", sym: "circle" },
-            "AINA": { col: "verde", sym: "circle" }, "COMO EASY": { col: "blu", sym: "circle" }, "PRISON BREAK": { col: "nero", sym: "diamond" }, "BUZZINO": { col: "rosso", sym: "square" }
+            "AINA": { col: "verde", sym: "circle" }, "COMO EASY": { col: "blu", sym: "circle" }, "PRISON BREAK": { col: "nero", sym: "diamond" }, "BUZZINO": { col: "rosso", sym: "square" },
+            "CERRETELLE": { col: "blu", sym: "circle" }
         };
 
         async function caricaDatiManutenzione() {
@@ -127,8 +129,8 @@
             list.innerHTML = '';
             geoJsonLayer.eachLayer(layer => {
                 const nome = layer.feature.properties.NOME;
-                const isClosed = trailStatus[nome] === true;
-                const cfg = trailTable[nome] || { col: "blu", sym: "circle" };
+                const isClosed = trailStatus[nome.toUpperCase().trim()] === true;
+                const cfg = trailTable[nome.toUpperCase().trim()] || { col: "blu", sym: "circle" };
                 const hexMap = { "verde": "#22c55e", "blu": "#3b82f6", "rosso": "#ef4444", "nero": "#000000" };
                 const tailBg = { "verde": "bg-verde", "blu": "bg-blu", "rosso": "bg-rosso", "nero": "bg-nero" };
                 
@@ -149,22 +151,23 @@
                         document.getElementById('ui-status-badge').style.display = isClosed ? 'block' : 'none';
                         document.getElementById('info-panel').style.display = 'block';
                         
-                        // --- NUOVA FUNZIONE DOWNLOAD PULITA ---
+                        // LOGICA DOWNLOAD AGGIORNATA
                         const nomeFileGPX = nome.toLowerCase().trim().replace(/\s+/g, '_') + ".gpx";
                         const finalLink = BASE_URL_GPX + nomeFileGPX;
 
-                        // Genera QR Code
+                        // QR Code
                         document.getElementById('qrcode').innerHTML = "";
-                        new QRCode(document.getElementById('qrcode'), { 
-                            text: finalLink, 
-                            width: 120, 
-                            height: 120,
-                            correctLevel : QRCode.CorrectLevel.H 
-                        });
+                        new QRCode(document.getElementById('qrcode'), { text: finalLink, width: 120, height: 120, correctLevel : QRCode.CorrectLevel.H });
 
-                        // Imposta azione pulsante Download
+                        // Pulsante con download forzato
                         document.getElementById('btn-download').onclick = () => { 
-                            window.open(finalLink, '_blank'); 
+                            const a = document.createElement('a');
+                            a.href = finalLink;
+                            a.target = "_blank";
+                            a.download = nomeFileGPX;
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
                         };
                     };
                     list.appendChild(card);
