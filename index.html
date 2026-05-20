@@ -33,6 +33,10 @@
         .filter-btn { transition: all 0.2s; border: 1px solid rgba(255,255,255,0.1); color: #94a3b8; }
         .filter-btn.active { background-color: #c5a059 !important; color: white; border-color: white; transform: scale(1.05); }
         .resort-marker { background: #c5a059; border: 3px solid white; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 900; }
+        
+        .exp-card { overflow: hidden; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); border: 1px solid rgba(255,255,255,0.05); }
+        .exp-card:hover { transform: translateY(-8px); border-color: #c5a059; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+        .exp-image { width: 100%; height: 200px; object-fit: cover; background: #2d3748; }
     </style>
 </head>
 <body>
@@ -73,19 +77,16 @@
 
     <div id="experience-overlay" class="fixed inset-0 z-[3000] bg-[#0f172a]/95 hidden p-10 overflow-y-auto">
         <div class="flex justify-between items-center mb-10 max-w-7xl mx-auto text-white">
-            <h2 class="text-4xl font-black uppercase italic leading-none">Weekly Experience Hub</h2>
-            <button onclick="toggleExperiences()" class="text-2xl">✕</button>
+            <h2 class="text-4xl font-black uppercase italic leading-none text-[#c5a059]">Weekly Experience Hub</h2>
+            <button onclick="toggleExperiences()" class="text-3xl hover:text-white transition-colors">✕</button>
         </div>
-        <div id="experience-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto"></div>
+        <div id="experience-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 max-w-7xl mx-auto pb-20"></div>
     </div>
 
     <script>
         const RESORT_COORDS = [42.9635639, 10.8630999];
-        // LINK MANUTENZIONE AGGIORNATO
         const SHEET_MANUTENZIONE_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSc0LjAfvMuepPzsxcOWuAvykxmW16NwcYSIH7vbPdiKulIUOBMTqBXzsR1fGuClt-tB54O5HzLfHZp/pub?gid=0&single=true&output=csv";
         const SHEET_EXPERIENCE_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTROGsq0FZj3cnpRrqco8JWrjUt4I_d9b1aU1sF5TKrC7474hbQ1d8BtwNibjZFjPlnoplVPSwVw3vu/pub?gid=0&single=true&output=csv";
-        
-        // CORRETTO IL NOME UTENTE IN ORZORO
         const BASE_URL_GPX = "https://orzoro.github.io/resort-experience/gpx/";
 
         const map = L.map('map', { zoomControl: false }).setView(RESORT_COORDS, 14);
@@ -122,7 +123,7 @@
                     geoJsonLayer = L.geoJSON(datiSentieri);
                     renderList();
                 }
-            } catch (e) { console.error("Errore foglio manutenzione", e); }
+            } catch (e) { console.error("Errore manutenzione", e); }
         }
 
         function renderList(filter = 'all') {
@@ -149,20 +150,14 @@
                         map.fitBounds(layer.getBounds(), { padding: [100, 100] });
                         layer.getElement().classList.add('path-active');
                         lastLayer = layer;
-                        
                         document.getElementById('ui-nome').innerText = nome;
                         document.getElementById('ui-status-badge').style.display = isClosed ? 'block' : 'none';
                         document.getElementById('info-panel').style.display = 'block';
-                        
                         const nomeFileGPX = nome.toLowerCase().trim().replace(/\s+/g, '_') + ".gpx";
                         const finalLink = BASE_URL_GPX + nomeFileGPX;
-
                         document.getElementById('qrcode').innerHTML = "";
                         new QRCode(document.getElementById('qrcode'), { text: finalLink, width: 120, height: 120, correctLevel : QRCode.CorrectLevel.H });
-
-                        document.getElementById('btn-download').onclick = () => { 
-                            window.open(finalLink, '_blank');
-                        };
+                        document.getElementById('btn-download').onclick = () => { window.open(finalLink, '_blank'); };
                     };
                     list.appendChild(card);
                     layer.addTo(map);
@@ -178,7 +173,7 @@
 
         async function renderExperiences() {
             const grid = document.getElementById('experience-grid');
-            grid.innerHTML = '<p class="text-white text-center col-span-full">Caricamento...</p>';
+            grid.innerHTML = '<p class="text-white text-center col-span-full opacity-50 uppercase tracking-widest">Sincronizzazione dati...</p>';
             try {
                 const proxyUrl = "https://corsproxy.io/?";
                 const response = await fetch(proxyUrl + encodeURIComponent(SHEET_EXPERIENCE_URL + "&cb=" + Date.now()));
@@ -188,20 +183,44 @@
                 rows.forEach(row => {
                     const cols = row.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g);
                     if (!cols || cols.length < 7) return;
+                    
                     const titolo = cols[0].replace(/^"|"$/g, '').trim();
                     const guida = cols[1].replace(/^"|"$/g, '').trim();
                     const desc = cols[2].replace(/^"|"$/g, '').trim();
                     const costo = cols[4].replace(/^"|"$/g, '').trim();
                     const cell = cols[6].replace(/^"|"$/g, '').trim();
+                    
+                    // COLONNA J -> INDICE 9 (A=0, B=1... J=9)
+                    const imgUrl = (cols[9] || "").replace(/^"|"$/g, '').trim();
+                    
                     let cleanCell = cell.replace(/\D/g, '');
                     if (cleanCell.length >= 9 && !cleanCell.startsWith('39')) cleanCell = '39' + cleanCell;
-                    const waLink = cleanCell.length >= 9 ? `https://wa.me/${cleanCell}?text=${encodeURIComponent('Ciao, info per: ' + titolo)}` : "#";
+                    const waLink = cleanCell.length >= 9 ? `https://wa.me/${cleanCell}?text=${encodeURIComponent('Ciao, vorrei prenotare: ' + titolo)}` : "#";
+                    
                     const card = document.createElement('div');
-                    card.className = "p-8 rounded-3xl flex flex-col justify-between shadow-2xl bg-[#1e293b] border border-white/5";
-                    card.innerHTML = `<div><div class="bg-white/10 w-fit px-4 py-2 rounded-xl text-white font-black italic mb-6">€ ${costo}</div><h3 class="text-2xl font-black text-white uppercase mb-2 leading-none">${titolo}</h3><p class="text-[#c5a059] font-bold text-[10px] uppercase mb-4">Guida: ${guida}</p><p class="text-slate-400 text-sm italic mb-6">"${desc}"</p></div><a href="${waLink}" target="_blank" class="bg-[#c5a059] text-white text-center py-4 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-[#b08d4a] transition-all">Prenota via WhatsApp</a>`;
+                    card.className = "exp-card rounded-3xl flex flex-col bg-[#1e293b]";
+                    
+                    const imageHtml = (imgUrl && imgUrl.startsWith('http')) 
+                        ? `<img src="${imgUrl}" class="exp-image" alt="${titolo}">`
+                        : `<div class="exp-image flex items-center justify-center bg-slate-800 text-slate-600 italic text-[10px] uppercase font-bold">Image Preview</div>`;
+
+                    card.innerHTML = `
+                        ${imageHtml}
+                        <div class="p-8 flex-1 flex flex-col justify-between">
+                            <div>
+                                <div class="bg-[#c5a059] w-fit px-3 py-1 rounded-md text-white font-black italic mb-4 text-xs tracking-tighter">€ ${costo}</div>
+                                <h3 class="text-2xl font-black text-white uppercase mb-1 leading-none tracking-tight">${titolo}</h3>
+                                <p class="text-slate-500 font-bold text-[9px] uppercase mb-4 tracking-[0.2em]">Guida: ${guida}</p>
+                                <p class="text-slate-400 text-sm italic mb-8 leading-relaxed font-light">"${desc}"</p>
+                            </div>
+                            <a href="${waLink}" target="_blank" class="bg-white text-slate-900 text-center py-4 rounded-xl font-black uppercase text-[10px] tracking-[0.2em] hover:bg-[#c5a059] hover:text-white transition-all shadow-xl">Invia Richiesta</a>
+                        </div>
+                    `;
                     grid.appendChild(card);
                 });
-            } catch (e) { grid.innerHTML = '<p class="text-red-500 text-center">Errore caricamento esperienze.</p>'; }
+            } catch (e) { 
+                grid.innerHTML = '<p class="text-red-500 text-center col-span-full">Errore di connessione al database.</p>'; 
+            }
         }
 
         function filterTrails(type) { document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active')); document.getElementById('f-' + type).classList.add('active'); renderList(type); }
