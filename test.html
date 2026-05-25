@@ -144,3 +144,91 @@
                     };
                     list.appendChild(card);
                     layer.addTo(map);
+                } else { map.removeLayer(layer); }
+            });
+        }
+
+        async function renderExperiences() {
+            const grid = document.getElementById('experience-grid');
+            grid.innerHTML = '<p class="text-white text-center col-span-full opacity-50 uppercase tracking-widest italic">Sincronizzazione...</p>';
+            try {
+                const proxyUrl = "https://corsproxy.io/?";
+                const response = await fetch(proxyUrl + encodeURIComponent(SHEET_EXPERIENCE_URL + "&cb=" + Date.now()));
+                const data = await response.text();
+                const rows = data.split(/\r?\n/).filter(row => row.trim() !== '').slice(1);
+                grid.innerHTML = '';
+                
+                rows.forEach(row => {
+                    const cols = row.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g);
+                    if (!cols || cols.length < 10) return;
+                    
+                    // --- MAPPATURA RICHIESTA: I=Orologio, H=Omini, D=Montagna ---
+                    const titolo     = cols[0].replace(/^"|"$/g, '').trim(); // A
+                    const desc       = cols[2].replace(/^"|"$/g, '').trim(); // C
+                    const difficolta = cols[3].replace(/^"|"$/g, '').trim(); // D -> MONTAGNA
+                    const costo      = cols[4].replace(/^"|"$/g, '').trim(); // E
+                    const cell       = cols[6].replace(/^"|"$/g, '').trim(); // G
+                    const persone    = cols[7].replace(/^"|"$/g, '').trim(); // H -> OMINI
+                    const durata     = cols[8].replace(/^"|"$/g, '').trim(); // I -> OROLOGIO
+                    const imgUrl     = (cols[9] || "").replace(/^"|"$/g, '').trim(); // J
+                    
+                    const cleanCell = cell.replace(/\D/g, '');
+                    const waLink = `https://wa.me/${cleanCell.startsWith('39') ? cleanCell : '39'+cleanCell}?text=${encodeURIComponent('Ciao! Vorrei prenotare: ' + titolo)}`;
+                    
+                    const card = document.createElement('div');
+                    card.className = "exp-card flex flex-col shadow-2xl";
+                    card.innerHTML = `
+                        <div class="relative"><img src="${imgUrl}" class="exp-image"><div class="absolute top-4 left-4 bg-[#c5a059] text-white text-[12px] font-black px-3 py-1.5 rounded-lg shadow-lg">€ ${costo}</div></div>
+                        <div class="p-6 flex-1 flex flex-col justify-between">
+                            <div>
+                                <h3 class="text-white text-2xl font-black uppercase mb-5 leading-tight italic">${titolo}</h3>
+                                <div class="flex flex-wrap gap-2 mb-6">
+                                    <div class="badge-info"><i data-lucide="clock"></i> ${durata}</div>
+                                    <div class="badge-info"><i data-lucide="users"></i> ${persone}</div>
+                                    <div class="badge-info"><i data-lucide="mountain"></i> ${difficolta}</div>
+                                </div>
+                                <p class="text-slate-400 text-xs italic mb-6 leading-relaxed border-l border-[#c5a059]/40 pl-3">"${desc}"</p>
+                            </div>
+                            <a href="${waLink}" target="_blank" class="bg-white text-slate-900 text-center py-4 rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-[#c5a059] hover:text-white transition-all shadow-lg">Invia Richiesta</a>
+                        </div>`;
+                    grid.appendChild(card);
+                });
+                lucide.createIcons();
+            } catch (e) { grid.innerHTML = 'Errore caricamento.'; }
+        }
+
+        async function caricaDatiManutenzione() {
+            try {
+                const proxyUrl = "https://corsproxy.io/?";
+                const response = await fetch(proxyUrl + encodeURIComponent(SHEET_MANUTENZIONE_URL + "&cb=" + Date.now()));
+                const data = await response.text();
+                const rows = data.split(/\r?\n/).filter(row => row.trim() !== '').slice(1);
+                trailStatus = {};
+                rows.forEach(row => {
+                    const cols = row.split(',');
+                    if(cols.length >= 2) {
+                        const nome = cols[0].trim().toUpperCase();
+                        const stato = cols[1].trim().toUpperCase();
+                        if (stato === "CHIUSO" || stato === "MANUTENZIONE") trailStatus[nome] = true;
+                    }
+                });
+                if (typeof datiSentieri !== 'undefined') {
+                    if (geoJsonLayer) map.removeLayer(geoJsonLayer);
+                    geoJsonLayer = L.geoJSON(datiSentieri);
+                    renderList();
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        function toggleExperiences() { 
+            const overlay = document.getElementById('experience-overlay');
+            overlay.style.display = (overlay.style.display === 'none' || overlay.style.display === '') ? 'block' : 'none';
+            if(overlay.style.display === 'block') renderExperiences(); 
+        }
+        function filterTrails(type) { document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active')); document.getElementById('f-' + type).classList.add('active'); renderList(type); }
+        function closePanel() { document.getElementById('info-panel').style.display = 'none'; }
+        
+        caricaDatiManutenzione();
+    </script>
+</body>
+</html>
