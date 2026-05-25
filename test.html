@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <script src="SENTIERI.js"></script>
     <script src="POI.js"></script>
     <style>
@@ -29,11 +30,6 @@
             #info-panel { left: 10px !important; right: 10px !important; bottom: 60px !important; }
         }
 
-        .symbol { width: 12px; height: 12px; display: inline-block; border: 1px solid white; vertical-align: middle; }
-        .circle { border-radius: 50%; }
-        .square { border-radius: 2px; }
-        .diamond { transform: rotate(45deg) scale(0.8); }
-        
         #info-panel { display: none; position: fixed; bottom: 30px; left: 410px; right: 30px; z-index: 2000; background: white; padding: 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .qr-container { background: white; padding: 5px; border-radius: 8px; }
         
@@ -41,11 +37,12 @@
         .filter-btn.active { background-color: #c5a059 !important; color: white; }
         
         #experience-overlay { position: fixed; inset: 0; z-index: 9999; background: #0f172a; overflow-y: auto; display: none; }
-        .exp-card { overflow: hidden; border-radius: 1.5rem; background: #1e293b; border: 1px solid rgba(255,255,255,0.1); transition: transform 0.2s; }
+        .exp-card { overflow: hidden; border-radius: 1.5rem; background: #1e293b; border: 1px solid rgba(255,255,255,0.1); }
         .exp-image { width: 100%; height: 220px; object-fit: cover; }
         
-        /* Nuovi stili per i Badge */
-        .badge-info { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 8px; font-size: 10px; font-weight: 700; color: #cbd5e1; display: flex; align-items: center; gap: 4px; }
+        /* Badge Info Professionali */
+        .badge-info { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 6px 10px; border-radius: 10px; font-size: 11px; font-weight: 600; color: #cbd5e1; display: flex; align-items: center; gap: 6px; }
+        .badge-info i { width: 14px; height: 14px; color: #c5a059; }
     </style>
 </head>
 <body>
@@ -55,9 +52,9 @@
             <span class="text-[8px] tracking-[0.4em] uppercase opacity-60">Experience Hub</span>
         </div>
         <div class="flex space-x-1">
-            <button onclick="filterTrails('all')" id="f-all" class="filter-btn active bg-slate-800 px-3 py-2 rounded-full text-[9px] font-black uppercase">Tutti</button>
-            <button onclick="filterTrails('easy')" id="f-easy" class="filter-btn bg-slate-800 px-3 py-2 rounded-full text-[9px] font-black uppercase">Easy</button>
-            <button onclick="filterTrails('pro')" id="f-pro" class="filter-btn bg-slate-800 px-3 py-2 rounded-full text-[9px] font-black uppercase">Pro</button>
+            <button onclick="filterTrails('all')" id="f-all" class="filter-btn active bg-slate-800 px-3 py-2 rounded-full text-[9px] font-black uppercase tracking-widest">Tutti</button>
+            <button onclick="filterTrails('easy')" id="f-easy" class="filter-btn bg-slate-800 px-3 py-2 rounded-full text-[9px] font-black uppercase tracking-widest">Easy</button>
+            <button onclick="filterTrails('pro')" id="f-pro" class="filter-btn bg-slate-800 px-3 py-2 rounded-full text-[9px] font-black uppercase tracking-widest">Pro</button>
         </div>
         <button onclick="toggleExperiences()" class="bg-[#c5a059] text-white px-4 py-2 rounded-full text-[9px] font-black uppercase shadow-lg shrink-0">⭐ Prenota Esperienza</button>
     </header>
@@ -88,7 +85,7 @@
 
     <div id="experience-overlay" class="p-4 md:p-10">
         <div class="sticky top-0 bg-[#0f172a] py-4 mb-8 border-b border-white/10 flex justify-between items-center z-[10001]">
-            <h2 class="text-2xl md:text-4xl font-black uppercase text-[#c5a059] italic">Weekly Experiences</h2>
+            <h2 class="text-2xl md:text-4xl font-black uppercase text-[#c5a059] italic tracking-tighter">Weekly Experiences</h2>
             <button onclick="toggleExperiences()" class="text-white text-3xl">✕</button>
         </div>
         <div id="experience-grid" class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto pb-20 text-white"></div>
@@ -176,7 +173,7 @@
 
         async function renderExperiences() {
             const grid = document.getElementById('experience-grid');
-            grid.innerHTML = '<p class="text-white text-center col-span-full opacity-50 uppercase tracking-widest italic">Caricamento avventure...</p>';
+            grid.innerHTML = '<p class="text-white text-center col-span-full opacity-50 uppercase tracking-widest italic">Sincronizzazione...</p>';
             try {
                 const proxyUrl = "https://corsproxy.io/?";
                 const response = await fetch(proxyUrl + encodeURIComponent(SHEET_EXPERIENCE_URL + "&cb=" + Date.now()));
@@ -194,7 +191,7 @@
                     const costo = cols[4].replace(/^"|"$/g, '').trim();    // Colonna E
                     const cell = cols[6].replace(/^"|"$/g, '').trim();     // Colonna G
                     const difficolta = cols[7].replace(/^"|"$/g, '').trim(); // Colonna H
-                    const persone = cols[8].replace(/^"|"$/g, '').trim();    // Colonna I (Numero Persone)
+                    const persone = cols[8].replace(/^"|"$/g, '').trim();    // Colonna I
                     const imgUrl = (cols[9] || "").replace(/^"|"$/g, '').trim(); // Colonna J
                     
                     const cleanCell = cell.replace(/\D/g, '');
@@ -209,20 +206,22 @@
                         </div>
                         <div class="p-6 flex-1 flex flex-col justify-between">
                             <div>
-                                <h3 class="text-white text-2xl font-black uppercase mb-3 leading-tight tracking-tight">${titolo}</h3>
+                                <h3 class="text-white text-2xl font-black uppercase mb-4 leading-tight tracking-tight italic">${titolo}</h3>
                                 
-                                <div class="flex flex-wrap gap-2 mb-4">
-                                    <div class="badge-info">⏱ ${durata}</div>
-                                    <div class="badge-info">🧗 ${difficolta}</div>
-                                    <div class="badge-info">👥 Max ${persone}</div>
+                                <div class="flex flex-wrap gap-2 mb-6">
+                                    <div class="badge-info"><i data-lucide="clock"></i>${durata}</div>
+                                    <div class="badge-info"><i data-lucide="users"></i>${persone}</div>
+                                    <div class="badge-info"><i data-lucide="mountain"></i>${difficolta}</div>
                                 </div>
 
-                                <p class="text-slate-400 text-xs italic mb-6 leading-relaxed border-l-2 border-[#c5a059]/30 pl-3">"${desc}"</p>
+                                <p class="text-slate-400 text-xs italic mb-6 leading-relaxed border-l border-[#c5a059]/40 pl-3">"${desc}"</p>
                             </div>
-                            <a href="${waLink}" target="_blank" class="bg-white text-slate-900 text-center py-4 rounded-xl font-black uppercase text-[11px] tracking-widest hover:bg-[#c5a059] hover:text-white transition-all shadow-lg active:scale-95">Richiedi Prenotazione</a>
+                            <a href="${waLink}" target="_blank" class="bg-white text-slate-900 text-center py-4 rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-[#c5a059] hover:text-white transition-all shadow-lg">Invia Richiesta</a>
                         </div>`;
                     grid.appendChild(card);
                 });
+                // Attiva le icone Lucide
+                lucide.createIcons();
             } catch (e) { grid.innerHTML = 'Errore caricamento.'; }
         }
 
