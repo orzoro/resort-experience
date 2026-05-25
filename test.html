@@ -41,9 +41,11 @@
         .filter-btn.active { background-color: #c5a059 !important; color: white; }
         
         #experience-overlay { position: fixed; inset: 0; z-index: 9999; background: #0f172a; overflow-y: auto; display: none; }
-        .exp-card { overflow: hidden; border-radius: 1.5rem; background: #1e293b; border: 1px solid rgba(255,255,255,0.05); transition: transform 0.2s; }
-        .exp-card:hover { transform: translateY(-5px); }
-        .exp-image { width: 100%; height: 200px; object-fit: cover; }
+        .exp-card { overflow: hidden; border-radius: 1.5rem; background: #1e293b; border: 1px solid rgba(255,255,255,0.1); transition: transform 0.2s; }
+        .exp-image { width: 100%; height: 220px; object-fit: cover; }
+        
+        /* Nuovi stili per i Badge */
+        .badge-info { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 8px; font-size: 10px; font-weight: 700; color: #cbd5e1; display: flex; align-items: center; gap: 4px; }
     </style>
 </head>
 <body>
@@ -174,7 +176,7 @@
 
         async function renderExperiences() {
             const grid = document.getElementById('experience-grid');
-            grid.innerHTML = '<p class="text-white text-center col-span-full opacity-50 uppercase tracking-widest">Sincronizzazione dati...</p>';
+            grid.innerHTML = '<p class="text-white text-center col-span-full opacity-50 uppercase tracking-widest italic">Caricamento avventure...</p>';
             try {
                 const proxyUrl = "https://corsproxy.io/?";
                 const response = await fetch(proxyUrl + encodeURIComponent(SHEET_EXPERIENCE_URL + "&cb=" + Date.now()));
@@ -188,30 +190,36 @@
                     
                     const titolo = cols[0].replace(/^"|"$/g, '').trim();
                     const desc = cols[2].replace(/^"|"$/g, '').trim();
-                    const durata = cols[3].replace(/^"|"$/g, '').trim(); // Colonna D
-                    const costo = cols[4].replace(/^"|"$/g, '').trim();  // Colonna E
-                    const cell = cols[6].replace(/^"|"$/g, '').trim();   // Colonna G
+                    const durata = cols[3].replace(/^"|"$/g, '').trim();   // Colonna D
+                    const costo = cols[4].replace(/^"|"$/g, '').trim();    // Colonna E
+                    const cell = cols[6].replace(/^"|"$/g, '').trim();     // Colonna G
                     const difficolta = cols[7].replace(/^"|"$/g, '').trim(); // Colonna H
+                    const persone = cols[8].replace(/^"|"$/g, '').trim();    // Colonna I (Numero Persone)
                     const imgUrl = (cols[9] || "").replace(/^"|"$/g, '').trim(); // Colonna J
                     
                     const cleanCell = cell.replace(/\D/g, '');
-                    const waLink = `https://wa.me/${cleanCell.startsWith('39') ? cleanCell : '39'+cleanCell}?text=${encodeURIComponent('Ciao! Vorrei informazioni per l\'esperienza: ' + titolo)}`;
+                    const waLink = `https://wa.me/${cleanCell.startsWith('39') ? cleanCell : '39'+cleanCell}?text=${encodeURIComponent('Ciao! Vorrei prenotare l\'esperienza: ' + titolo)}`;
                     
                     const card = document.createElement('div');
                     card.className = "exp-card flex flex-col shadow-2xl";
                     card.innerHTML = `
-                        <img src="${imgUrl}" class="exp-image" alt="${titolo}">
+                        <div class="relative">
+                            <img src="${imgUrl}" class="exp-image" alt="${titolo}">
+                            <div class="absolute top-4 left-4 bg-[#c5a059] text-white text-[11px] font-black px-3 py-1.5 rounded-lg shadow-lg">€ ${costo}</div>
+                        </div>
                         <div class="p-6 flex-1 flex flex-col justify-between">
                             <div>
-                                <div class="flex justify-between items-start mb-3">
-                                    <span class="bg-[#c5a059] text-white text-[10px] font-black px-3 py-1 rounded-full shadow-lg">€ ${costo}</span>
-                                    <span class="text-slate-400 text-[9px] font-black uppercase tracking-[0.2em]">${difficolta}</span>
+                                <h3 class="text-white text-2xl font-black uppercase mb-3 leading-tight tracking-tight">${titolo}</h3>
+                                
+                                <div class="flex flex-wrap gap-2 mb-4">
+                                    <div class="badge-info">⏱ ${durata}</div>
+                                    <div class="badge-info">🧗 ${difficolta}</div>
+                                    <div class="badge-info">👥 Max ${persone}</div>
                                 </div>
-                                <h3 class="text-white text-xl font-black uppercase mb-1 leading-tight">${titolo}</h3>
-                                <p class="text-[#c5a059] font-bold text-[10px] uppercase mb-4 tracking-widest italic">⏱ Durata: ${durata}</p>
-                                <p class="text-slate-400 text-xs italic mb-6 leading-relaxed opacity-80">"${desc}"</p>
+
+                                <p class="text-slate-400 text-xs italic mb-6 leading-relaxed border-l-2 border-[#c5a059]/30 pl-3">"${desc}"</p>
                             </div>
-                            <a href="${waLink}" target="_blank" class="bg-white text-slate-900 text-center py-3 rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-[#c5a059] hover:text-white transition-all shadow-lg active:scale-95">Invia Richiesta</a>
+                            <a href="${waLink}" target="_blank" class="bg-white text-slate-900 text-center py-4 rounded-xl font-black uppercase text-[11px] tracking-widest hover:bg-[#c5a059] hover:text-white transition-all shadow-lg active:scale-95">Richiedi Prenotazione</a>
                         </div>`;
                     grid.appendChild(card);
                 });
