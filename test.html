@@ -14,34 +14,22 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #0f172a; margin: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        .user-dot { background-color: #3b82f6; border: 3px solid white; border-radius: 50%; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
         .bg-verde { background-color: #22c55e !important; }
         .bg-blu { background-color: #3b82f6 !important; }
         .bg-rosso { background-color: #ef4444 !important; }
         .bg-nero { background-color: #000000 !important; }
         #main-container { display: flex; flex: 1; overflow: hidden; position: relative; }
         #map { flex: 1; position: relative; z-index: 10; }
-        /* Stile Punto GPS */
-        .user-dot { background-color: #3b82f6; border: 3px solid white; border-radius: 50%; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
         #sidebar { width: 380px; height: 100%; background: #1e293b; border-right: 1px solid #334155; z-index: 1001; transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
-        @media (max-width: 768px) {
-            #sidebar { position: fixed; bottom: 0; left: 0; width: 100%; height: 70vh; border-right: none; border-radius: 25px 25px 0 0; transform: translateY(calc(100% - 60px)); }
-            #sidebar.open { transform: translateY(0); }
-            #info-panel { left: 10px !important; right: 10px !important; bottom: 80px !important; width: calc(100% - 20px) !important; }
-        }
-        .filter-btn { transition: all 0.2s; border: 1px solid rgba(255,255,255,0.1); color: #94a3b8; font-weight: 800; }
-        .filter-btn.active { background-color: #c5a059 !important; color: white; border-color: #c5a059; }
-        #info-panel { display: none; position: fixed; bottom: 30px; left: 410px; right: 30px; z-index: 2000; background: white; padding: 20px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.6); }
+        #info-panel { display: none; position: fixed; bottom: 30px; left: 410px; right: 30px; z-index: 2000; background: white; padding: 20px; border-radius: 20px; }
         #experience-overlay { position: fixed; inset: 0; z-index: 9999; background: #0f172a; overflow-y: auto; display: none; }
+        .exp-card { overflow: hidden; border-radius: 1.5rem; background: #1e293b; border: 1px solid rgba(255,255,255,0.1); }
+        .exp-image { width: 100%; height: 220px; object-fit: cover; }
+        .badge-info { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 6px 12px; border-radius: 10px; font-size: 11px; font-weight: 700; color: #f8fafc; display: flex; align-items: center; gap: 8px; }
     </style>
 </head>
 <body>
-    <header class="h-[100px] bg-[#0f172a] border-b border-slate-800 flex items-center justify-between px-4 md:px-6 text-white shrink-0 relative z-[1002]">
-        <div class="flex flex-col cursor-pointer" onclick="location.reload()">
-            <h1 class="text-xl md:text-2xl font-black text-[#c5a059] uppercase italic leading-tight">Pelagone</h1>
-        </div>
-        <button onclick="toggleExperiences()" class="bg-[#c5a059] text-white px-4 py-2 rounded-full text-[9px] font-black uppercase">⭐ PRENOTA</button>
-    </header>
-
     <div id="main-container">
         <aside id="sidebar"><div id="trail-list" class="p-4 space-y-3 overflow-y-auto h-full"></div></aside>
         <main id="map">
@@ -62,7 +50,7 @@
     </div>
 
     <script>
-        // 1. FUNZIONE GPS (separata)
+        // --- GPS ---
         let userMarker = null;
         function initTracking() {
             if (!navigator.geolocation) { alert("Geolocalizzazione non supportata."); return; }
@@ -75,14 +63,40 @@
             }, null, { enableHighAccuracy: true });
         }
 
-        // 2. CODICE ORIGINALE (ripristinato)
+        // --- CORE ---
+        const BASE_URL_GPX = "https://orzoro.github.io/resort-experience/gpx/";
+        const SHEET_MANUTENZIONE_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSc0LjAfvMuepPzsxcOWuAvykxmW16NwcYSIH7vbPdiKulIUOBMTqBXzsR1fGuClt-tB54O5HzLfHZp/pub?gid=0&single=true&output=csv";
+        const SHEET_EXPERIENCE_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTROGsq0FZj3cnpRrqco8JWrjUt4I_d9b1aU1sF5TKrC7474hbQ1d8BtwNibjZFjPlnoplVPSwVw3vu/pub?gid=0&single=true&output=csv";
+
         const map = L.map('map', { zoomControl: false }).setView([42.9635639, 10.8630999], 13);
         L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png').addTo(map);
+
         let trailStatus = {};
         let geoJsonLayer;
-        
-        // ... (Qui nel tuo file dovresti avere le altre funzioni: init, renderList, ecc.) ...
-        // Se non le vedi nel codice che hai copiato, incollale subito dopo questa riga.
+
+        async function init() {
+            try {
+                const response = await fetch(SHEET_MANUTENZIONE_URL);
+                const data = await response.text();
+                const rows = data.split(/\r?\n/).slice(1);
+                rows.forEach(row => {
+                    const cols = row.split(',');
+                    if(cols.length >= 2) {
+                        const s = cols[1].trim().toUpperCase();
+                        if(s === "CHIUSO" || s === "MANUTENZIONE") trailStatus[cols[0].trim().toUpperCase()] = true;
+                    }
+                });
+                if (typeof datiSentieri !== 'undefined') {
+                    geoJsonLayer = L.geoJSON(datiSentieri).addTo(map);
+                    renderList();
+                }
+            } catch (e) { console.log(e); }
+        }
+
+        // (Incolla qui sotto la tua funzione renderList e renderExperiences che avevi nel file precedente)
+        // ... (renderList e renderExperiences funzionanti) ...
+
+        init();
     </script>
 </body>
 </html>
