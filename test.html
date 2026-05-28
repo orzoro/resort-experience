@@ -14,20 +14,17 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #0f172a; margin: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-        
         .bg-verde { background-color: #22c55e !important; }
         .bg-blu { background-color: #3b82f6 !important; }
         .bg-rosso { background-color: #ef4444 !important; }
         .bg-nero { background-color: #000000 !important; }
-
         #main-container { display: flex; flex: 1; overflow: hidden; position: relative; }
         #map { flex: 1; position: relative; z-index: 10; }
-
-        /* Stile per il punto blu GPS */
+        
+        /* Punto Blu GPS */
         .user-dot { background-color: #3b82f6; border: 3px solid white; border-radius: 50%; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
 
         #sidebar { width: 380px; height: 100%; background: #1e293b; border-right: 1px solid #334155; z-index: 1001; transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
-
         @media (max-width: 768px) {
             #sidebar { position: fixed; bottom: 0; left: 0; width: 100%; height: 70vh; border-right: none; border-radius: 25px 25px 0 0; transform: translateY(calc(100% - 60px)); }
             #sidebar.open { transform: translateY(0); }
@@ -36,20 +33,18 @@
 
         @keyframes pathFlash { 0% { opacity: 1; stroke-width: 12; } 50% { opacity: 0.3; stroke-width: 22; } 100% { opacity: 1; stroke-width: 12; } }
         .flash-path { animation: pathFlash 0.5s ease-in-out 6; }
-
         .filter-btn { transition: all 0.2s; border: 1px solid rgba(255,255,255,0.1); color: #94a3b8; font-weight: 800; }
         .filter-btn.active { background-color: #c5a059 !important; color: white; border-color: #c5a059; }
-        
         #info-panel { display: none; position: fixed; bottom: 30px; left: 410px; right: 30px; z-index: 2000; background: white; padding: 20px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.6); }
         .symbol { width: 12px; height: 12px; display: inline-block; border: 1px solid white; vertical-align: middle; }
         .circle { border-radius: 50%; }
         .square { border-radius: 2px; }
         .diamond { transform: rotate(45deg) scale(0.8); }
-
         #experience-overlay { position: fixed; inset: 0; z-index: 9999; background: #0f172a; overflow-y: auto; display: none; }
         .exp-card { overflow: hidden; border-radius: 1.5rem; background: #1e293b; border: 1px solid rgba(255,255,255,0.1); }
         .exp-image { width: 100%; height: 220px; object-fit: cover; }
         .badge-info { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 6px 12px; border-radius: 10px; font-size: 11px; font-weight: 700; color: #f8fafc; display: flex; align-items: center; gap: 8px; }
+        .badge-info i { width: 15px; height: 15px; color: #c5a059; shrink: 0; }
     </style>
 </head>
 <body>
@@ -58,14 +53,12 @@
             <h1 class="text-xl md:text-2xl font-black text-[#c5a059] uppercase italic leading-tight">Pelagone</h1>
             <span class="text-[7px] tracking-[0.3em] uppercase opacity-60">Experience Hub</span>
         </div>
-
         <div class="flex bg-slate-800/50 p-1 rounded-full border border-slate-700">
             <button onclick="filterTrails('all')" id="f-all" class="filter-btn active px-3 py-1.5 rounded-full text-[9px] uppercase">Tutti</button>
             <button onclick="filterTrails('easy')" id="f-easy" class="filter-btn px-3 py-1.5 rounded-full text-[9px] uppercase">Easy</button>
             <button onclick="filterTrails('pro')" id="f-pro" class="filter-btn px-3 py-1.5 rounded-full text-[9px] uppercase">Pro</button>
         </div>
-
-        <button onclick="toggleExperiences()" class="bg-[#c5a059] text-white px-4 py-2 rounded-full text-[9px] font-black uppercase shadow-lg shrink-0 active:scale-95 transition-transform">⭐ Prenota</button>
+        <button onclick="toggleExperiences()" class="bg-[#c5a059] text-white px-4 py-2 rounded-full text-[9px] font-black uppercase shadow-lg shrink-0 active:scale-95 transition-transform">⭐ Prenota Esperienza</button>
     </header>
 
     <div id="main-container">
@@ -112,7 +105,6 @@
         const map = L.map('map', { zoomControl: false }).setView([42.9635639, 10.8630999], 13);
         L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png').addTo(map);
 
-        // Tracking GPS
         let userMarker = null;
         function initTracking() {
             if (!navigator.geolocation) { alert("Geolocalizzazione non supportata."); return; }
@@ -130,10 +122,12 @@
         const trailTable = { "SANTANSANO": { col: "rosso", sym: "square" }, "COMO HD": { col: "rosso", sym: "square" }, "ROGNOSO": { col: "rosso", sym: "square" }, "DH AIONE": { col: "rosso", sym: "square" }, "CESSA RIGATTAIE": { col: "rosso", sym: "square" }, "AVVOLTORE": { col: "blu", sym: "circle" }, "AINA": { col: "verde", sym: "circle" }, "COMO EASY": { col: "blu", sym: "circle" }, "PRISON BREAK": { col: "nero", sym: "diamond" }, "BUZZINO": { col: "rosso", sym: "square" }, "CERRETELLE": { col: "blu", sym: "circle" } };
 
         function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
-        function renderList(filter = 'all') { /* ... logica esistente ... */ }
-        async function renderExperiences() { /* ... logica esistente ... */ }
-        async function init() { /* ... logica esistente ... */ }
-        function toggleExperiences() { const o = document.getElementById('experience-overlay'); const h = (o.style.display === 'none' || o.style.display === ''); o.style.display = h ? 'block' : 'none'; if(h) renderExperiences(); }
+        function renderList(filter = 'all') { /* ... la tua logica originale ... */ }
+        async function renderExperiences() { /* ... la tua logica originale ... */ }
+        async function init() { /* ... la tua logica originale ... */ }
+
+        // --- Mantenute le tue funzioni originali di controllo ---
+        function toggleExperiences() { const overlay = document.getElementById('experience-overlay'); const isHidden = (overlay.style.display === 'none' || overlay.style.display === ''); overlay.style.display = isHidden ? 'block' : 'none'; if(isHidden) renderExperiences(); }
         function filterTrails(type) { document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active')); document.getElementById('f-' + type).classList.add('active'); renderList(type); }
         function closePanel() { document.getElementById('info-panel').style.display = 'none'; }
         
