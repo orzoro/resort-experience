@@ -14,12 +14,17 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #0f172a; margin: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        #main-container { display: flex; flex: 1; overflow: hidden; position: relative; }
+        #map { flex: 1; position: relative; }
+        #sidebar { width: 380px; height: 100%; background: #1e293b; border-right: 1px solid #334155; z-index: 1001; }
+        .user-dot { background-color: #3b82f6; border: 3px solid white; border-radius: 50%; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
+        .filter-btn.active { background-color: #c5a059 !important; }
         .bg-verde { background-color: #22c55e !important; }
         .bg-blu { background-color: #3b82f6 !important; }
         .bg-rosso { background-color: #ef4444 !important; }
         .bg-nero { background-color: #000000 !important; }
-        /* Aggiunta per il punto GPS */
-        .user-dot { background-color: #3b82f6; border: 3px solid white; border-radius: 50%; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
+        .exp-image { width: 100%; height: 220px; object-fit: cover; }
+        .badge-info { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 6px 12px; border-radius: 10px; font-size: 11px; font-weight: 700; color: #f8fafc; display: flex; align-items: center; gap: 8px; }
     </style>
 </head>
 <body>
@@ -31,44 +36,42 @@
         </div>
     </header>
 
-    <div id="main-container" class="flex flex-1 overflow-hidden">
-        <aside id="sidebar" class="w-[380px] bg-[#1e293b] border-r border-slate-800 p-4 overflow-y-auto">
-            <div id="trail-list" class="space-y-3"></div>
-        </aside>
-        <main id="map" class="flex-1 relative"></main>
+    <div id="main-container">
+        <aside id="sidebar"><div id="trail-list" class="p-4 space-y-3 overflow-y-auto h-full"></div></aside>
+        <main id="map">
+            <div id="info-panel" style="display:none; position:fixed; bottom:30px; left:410px; right:30px; z-index:2000; background:white; padding:20px; border-radius:20px;">
+                <button onclick="closePanel()" class="absolute -top-3 -right-3 bg-white w-8 h-8 rounded-full shadow-lg text-[10px]">✕</button>
+                <h2 id="ui-nome" class="text-xl font-black italic">Nome Trail</h2>
+                <div id="qrcode" class="my-2"></div>
+                <div class="flex gap-2 mt-2">
+                    <button id="btn-download" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-[10px]">📂 GPX</button>
+                    <button onclick="initTracking()" class="bg-slate-900 text-white px-4 py-2 rounded-xl text-[10px]">📍 NAVIGA</button>
+                </div>
+            </div>
+        </main>
     </div>
 
-    <div id="info-panel" style="display:none;" class="fixed bottom-10 left-[400px] right-10 z-[2000] bg-white p-6 rounded-2xl shadow-2xl">
-        <h2 id="ui-nome" class="text-xl font-black italic">Nome Trail</h2>
-        <div class="flex gap-3 mt-4">
-            <button id="btn-download" class="bg-blue-600 text-white px-6 py-2 rounded-xl text-[10px] font-bold">📂 SCARICA GPX</button>
-            <button onclick="initTracking()" class="bg-slate-900 text-white px-6 py-2 rounded-xl text-[10px] font-bold">📍 NAVIGA</button>
-        </div>
-        <div id="qrcode" class="mt-4"></div>
-    </div>
-
-    <div id="experience-overlay" style="display:none;" class="fixed inset-0 z-[9999] bg-[#0f172a] p-10 overflow-y-auto">
-        <button onclick="toggleExperiences()" class="text-white text-3xl">✕</button>
-        <div id="experience-grid" class="grid grid-cols-3 gap-8 mt-10"></div>
+    <div id="experience-overlay" style="display:none; position:fixed; inset:0; z-index:9999; background:#0f172a; padding:40px; overflow-y:auto;">
+        <button onclick="toggleExperiences()" class="text-white text-3xl absolute top-5 right-10">✕</button>
+        <div id="experience-grid" class="grid grid-cols-1 md:grid-cols-3 gap-8"></div>
     </div>
 
     <script>
         // --- FUNZIONE GPS ---
         let userMarker = null;
         function initTracking() {
-            if (!navigator.geolocation) { alert("Geolocalizzazione non supportata"); return; }
-            navigator.geolocation.watchPosition((p) => {
-                const ll = [p.coords.latitude, p.coords.longitude];
+            if (!navigator.geolocation) { alert("Geolocalizzazione non supportata."); return; }
+            navigator.geolocation.watchPosition((position) => {
+                const latlng = [position.coords.latitude, position.coords.longitude];
                 if (!userMarker) {
-                    userMarker = L.marker(ll, {icon: L.divIcon({className: 'user-dot', iconSize: [16, 16]})}).addTo(map);
-                } else { userMarker.setLatLng(ll); }
-            }, null, {enableHighAccuracy: true});
+                    const icon = L.divIcon({ className: 'user-dot', iconSize: [16, 16] });
+                    userMarker = L.marker(latlng, { icon: icon }).addTo(map);
+                } else { userMarker.setLatLng(latlng); }
+            }, null, { enableHighAccuracy: true });
         }
 
-        // --- CORE ---
-        // (Qui dovresti avere le tue variabili BASE_URL_GPX, le chiamate a fetch, le funzioni renderList, renderExperiences e init)
-        // Se incolli qui il blocco di script del tuo file originale (quello che funzionava prima delle modifiche), tutto tornerà a posto.
-const BASE_URL_GPX = "https://orzoro.github.io/resort-experience/gpx/";
+        // --- SCRIPT ORIGINALE ---
+        const BASE_URL_GPX = "https://orzoro.github.io/resort-experience/gpx/";
         const SHEET_MANUTENZIONE_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSc0LjAfvMuepPzsxcOWuAvykxmW16NwcYSIH7vbPdiKulIUOBMTqBXzsR1fGuClt-tB54O5HzLfHZp/pub?gid=0&single=true&output=csv";
         const SHEET_EXPERIENCE_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTROGsq0FZj3cnpRrqco8JWrjUt4I_d9b1aU1sF5TKrC7474hbQ1d8BtwNibjZFjPlnoplVPSwVw3vu/pub?gid=0&single=true&output=csv";
 
@@ -84,8 +87,6 @@ const BASE_URL_GPX = "https://orzoro.github.io/resort-experience/gpx/";
             "AINA": { col: "verde", sym: "circle" }, "COMO EASY": { col: "blu", sym: "circle" }, "PRISON BREAK": { col: "nero", sym: "diamond" }, "BUZZINO": { col: "rosso", sym: "square" },
             "CERRETELLE": { col: "blu", sym: "circle" }
         };
-
-        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
 
         function renderList(filter = 'all') {
             const list = document.getElementById('trail-list');
@@ -108,10 +109,6 @@ const BASE_URL_GPX = "https://orzoro.github.io/resort-experience/gpx/";
                     
                     card.onclick = () => {
                         map.fitBounds(layer.getBounds(), { padding: [30, 80] });
-                        if(layer.getElement()) {
-                            layer.getElement().classList.add('flash-path');
-                            setTimeout(() => { if(layer.getElement()) layer.getElement().classList.remove('flash-path'); }, 3000);
-                        }
                         document.getElementById('ui-nome').innerText = nome;
                         document.getElementById('info-panel').style.display = 'block';
                         const finalLink = BASE_URL_GPX + nome.toLowerCase().trim().replace(/\s+/g, '_') + ".gpx";
@@ -120,7 +117,6 @@ const BASE_URL_GPX = "https://orzoro.github.io/resort-experience/gpx/";
                             new QRCode(document.getElementById('qrcode'), { text: finalLink, width: 80, height: 80 });
                         }
                         document.getElementById('btn-download').onclick = () => window.open(finalLink, '_blank');
-                        if(window.innerWidth <= 768) document.getElementById('sidebar').classList.remove('open');
                     };
                     list.appendChild(card);
                     layer.addTo(map);
@@ -142,21 +138,20 @@ const BASE_URL_GPX = "https://orzoro.github.io/resort-experience/gpx/";
                     const cols = row.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g);
                     if (!cols || cols.length < 10) return;
                     
-                    // --- MAPPATURA: I=Orologio(8), H=Omini(7), D=Montagna(3) ---
-                    const titolo     = cols[0].replace(/^"|"$/g, '').trim(); 
-                    const desc       = cols[2].replace(/^"|"$/g, '').trim(); 
-                    const difficolta = cols[3].replace(/^"|"$/g, '').trim(); // D
-                    const costo      = cols[4].replace(/^"|"$/g, '').trim(); 
-                    const cell       = cols[6].replace(/^"|"$/g, '').trim(); 
-                    const persone    = cols[7].replace(/^"|"$/g, '').trim(); // H
-                    const durata     = cols[8].replace(/^"|"$/g, '').trim(); // I
-                    const imgUrl     = (cols[9] || "").replace(/^"|"$/g, '').trim(); 
+                    const titolo = cols[0].replace(/^"|"$/g, '').trim(); 
+                    const desc = cols[2].replace(/^"|"$/g, '').trim(); 
+                    const difficolta = cols[3].replace(/^"|"$/g, '').trim(); 
+                    const costo = cols[4].replace(/^"|"$/g, '').trim(); 
+                    const cell = cols[6].replace(/^"|"$/g, '').trim(); 
+                    const persone = cols[7].replace(/^"|"$/g, '').trim(); 
+                    const durata = cols[8].replace(/^"|"$/g, '').trim(); 
+                    const imgUrl = (cols[9] || "").replace(/^"|"$/g, '').trim(); 
                     
                     const cleanCell = cell.replace(/\D/g, '');
                     const waLink = `https://wa.me/${cleanCell.startsWith('39') ? cleanCell : '39'+cleanCell}?text=${encodeURIComponent('Ciao! Vorrei prenotare: ' + titolo)}`;
                     
                     const card = document.createElement('div');
-                    card.className = "exp-card flex flex-col shadow-2xl";
+                    card.className = "exp-card flex flex-col shadow-2xl rounded-3xl overflow-hidden bg-[#1e293b]";
                     card.innerHTML = `
                         <div class="relative"><img src="${imgUrl}" class="exp-image"><div class="absolute top-4 left-4 bg-[#c5a059] text-white text-[12px] font-black px-3 py-1.5 rounded-lg shadow-lg">€ ${costo}</div></div>
                         <div class="p-6 flex-1 flex flex-col justify-between">
